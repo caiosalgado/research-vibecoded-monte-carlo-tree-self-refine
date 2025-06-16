@@ -56,7 +56,10 @@ class AISuiteClient:
             ai_response = response.choices[0].message.content
             
             if print_response:
+                print("--------------------------------")
+                print("AI Response:")
                 print(ai_response)
+                print("--------------------------------")
             
             return ai_response
             

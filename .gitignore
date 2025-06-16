@@ -8,3 +8,29 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Result files
+# results/*.csv
+# results/*.json
+# results/*.txt
+
+# Temporary files
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Log files
+*.log
+logs/
+
+# Model files (if any get downloaded)
+models/
+*.bin
+*.safetensors

@@ -1,0 +1,331 @@
+{
+  "timestamp": "2025-06-16T03:59:55.875107",
+  "model": "ollama:deepseek-r1:1.5b",
+  "total_problems": 9,
+  "benchmark_results": [
+    {
+      "problem_id": "isPalindrome",
+      "problem_title": "Palindrome Number",
+      "runs": [
+        {
+          "run_number": 1,
+          "status": "success",
+          "code": "def isPalindrome(x: int) -> bool:\n    if x < 0:\n        return False\n    s = str(x)\n    return s == s[::-1]",
+          "partial_accuracy": 1.0,
+          "full_accuracy": 1.0,
+          "error_count": 0
+        },
+        {
+          "run_number": 2,
+          "status": "success",
+          "code": "def isPalindrome(x: int) -> bool:\n    if x < 0:\n        return False\n    s = str(x)\n    return s == s[::-1]",
+          "partial_accuracy": 1.0,
+          "full_accuracy": 1.0,
+          "error_count": 0
+        },
+        {
+          "run_number": 3,
+          "status": "success",
+          "code": "def isPalindrome(x: int) -> bool:\n    if x < 0:\n        return False\n    s = str(x)\n    reversed_s = s[::-1]\n    return s == reversed_s",
+          "partial_accuracy": 1.0,
+          "full_accuracy": 1.0,
+          "error_count": 0
+        }
+      ],
+      "summary": {
+        "avg_partial_accuracy": 1.0,
+        "avg_full_accuracy": 1.0,
+        "total_errors": 0,
+        "consistency_score": 1.0
+      }
+    },
+    {
+      "problem_id": "romanToInt",
+      "problem_title": "Roman to Integer",
+      "runs": [
+        {
+          "run_number": 1,
+          "status": "no_code",
+          "code": "",
+          "partial_accuracy": 0.0,
+          "full_accuracy": 0.0,
+          "error_count": 1
+        },
+        {
+          "run_number": 2,
+          "status": "no_code",
+          "code": "",
+          "partial_accuracy": 0.0,
+          "full_accuracy": 0.0,
+          "error_count": 1
+        },
+        {
+          "run_number": 3,
+          "status": "no_code",
+          "code": "",
+          "partial_accuracy": 0.0,
+          "full_accuracy": 0.0,
+          "error_count": 1
+        }
+      ],
+      "summary": {
+        "avg_partial_accuracy": 0.0,
+        "avg_full_accuracy": 0.0,
+        "total_errors": 3,
+        "consistency_score": 1.0
+      }
+    },
+    {
+      "problem_id": "twoSum",
+      "problem_title": "Two Sum",
+      "runs": [
+        {
+          "run_number": 1,
+          "status": "success",
+          "code": "def twoSum(nums: List[int], target: int) -> List[int]:\n    seen = {}\n    for i, num in enumerate(nums):\n        complement = target - num\n        if complement in seen:\n            return [seen[complement], i]\n        else:\n            seen[num] = i",
+          "partial_accuracy": 1.0,
+          "full_accuracy": 1.0,
+          "error_count": 0
+        },
+        {
+          "run_number": 2,
+          "status": "success",
+          "code": "def twoSum(nums: List[int], target: int) -> List[int]:\n    num_map = {}\n    for i, num in enumerate(nums):\n        needed = target - num\n        if needed in num_map:\n            return [num_map[needed], i]\n        else:\n            num_map[num] = i\n    return []",
+          "partial_accuracy": 1.0,
+          "full_accuracy": 1.0,
+          "error_count": 0
+        },
+        {
+          "run_number": 3,
+          "status": "success",
+          "code": "def twoSum(nums: List[int], target: int) -> List[int]:\n    value_indices = {}\n    for i, num in enumerate(nums):\n        complement = target - num\n        if complement in value_indices:\n            return [i, value_indices[complement]]\n        else:\n            value_indices[num] = i",
+          "partial_accuracy": 0.0,
+          "full_accuracy": 0.0,
+          "error_count": 3
+        }
+      ],
+      "summary": {
+        "avg_partial_accuracy": 0.6666666666666666,
+        "avg_full_accuracy": 0.6666666666666666,
+        "total_errors": 3,
+        "consistency_score": 0.0
+      }
+    },
+    {
+      "problem_id": "addTwoNumbers",
+      "problem_title": "Add Two Numbers",
+      "runs": [
+        {
+          "run_number": 1,
+          "status": "no_code",
+          "code": "",
+          "partial_accuracy": 0.0,
+          "full_accuracy": 0.0,
+          "error_count": 1
+        },
+        {
+          "run_number": 2,
+          "status": "no_code",
+          "code": "",
+          "partial_accuracy": 0.0,
+          "full_accuracy": 0.0,
+          "error_count": 1
+        },
+        {
+          "run_number": 3,
+          "status": "no_code",
+          "code": "",
+          "partial_accuracy": 0.0,
+          "full_accuracy": 0.0,
+          "error_count": 1
+        }
+      ],
+      "summary": {
+        "avg_partial_accuracy": 0.0,
+        "avg_full_accuracy": 0.0,
+        "total_errors": 3,
+        "consistency_score": 1.0
+      }
+    },
+    {
+      "problem_id": "longestPalindrome",
+      "problem_title": "Longest Palindromic Substring",
+      "runs": [
+        {
+          "run_number": 1,
+          "status": "no_code",
+          "code": "",
+          "partial_accuracy": 0.0,
+          "full_accuracy": 0.0,
+          "error_count": 1
+        },
+        {
+          "run_number": 2,
+          "status": "no_code",
+          "code": "",
+          "partial_accuracy": 0.0,
+          "full_accuracy": 0.0,
+          "error_count": 1
+        },
+        {
+          "run_number": 3,
+          "status": "no_code",
+          "code": "",
+          "partial_accuracy": 0.0,
+          "full_accuracy": 0.0,
+          "error_count": 1
+        }
+      ],
+      "summary": {
+        "avg_partial_accuracy": 0.0,
+        "avg_full_accuracy": 0.0,
+        "total_errors": 3,
+        "consistency_score": 1.0
+      }
+    },
+    {
+      "problem_id": "maxArea",
+      "problem_title": "Container With Most Water",
+      "runs": [
+        {
+          "run_number": 1,
+          "status": "success",
+          "code": "def maxArea(height: List[int]) -> int:\n    n = len(height)\n    if n == 0 or n == 1:\n        return 0\n    left = 0\n    right = n - 1\n    max_area = 0\n    while left <= right:\n        current_area = (right - left) * min(height[left], height[right])\n        if current_area > max_area:\n            max_area = current_area\n        if height[left] < height[right]:\n            left += 1\n        else:\n            right -= 1\n    return max_area",
+          "partial_accuracy": 1.0,
+          "full_accuracy": 1.0,
+          "error_count": 0
+        },
+        {
+          "run_number": 2,
+          "status": "no_code",
+          "code": "",
+          "partial_accuracy": 0.0,
+          "full_accuracy": 0.0,
+          "error_count": 1
+        },
+        {
+          "run_number": 3,
+          "status": "no_code",
+          "code": "",
+          "partial_accuracy": 0.0,
+          "full_accuracy": 0.0,
+          "error_count": 1
+        }
+      ],
+      "summary": {
+        "avg_partial_accuracy": 0.3333333333333333,
+        "avg_full_accuracy": 0.3333333333333333,
+        "total_errors": 2,
+        "consistency_score": 0.0
+      }
+    },
+    {
+      "problem_id": "mergeKLists",
+      "problem_title": "Merge k Sorted Lists",
+      "runs": [
+        {
+          "run_number": 1,
+          "status": "no_code",
+          "code": "",
+          "partial_accuracy": 0.0,
+          "full_accuracy": 0.0,
+          "error_count": 1
+        },
+        {
+          "run_number": 2,
+          "status": "no_code",
+          "code": "",
+          "partial_accuracy": 0.0,
+          "full_accuracy": 0.0,
+          "error_count": 1
+        },
+        {
+          "run_number": 3,
+          "status": "no_code",
+          "code": "",
+          "partial_accuracy": 0.0,
+          "full_accuracy": 0.0,
+          "error_count": 1
+        }
+      ],
+      "summary": {
+        "avg_partial_accuracy": 0.0,
+        "avg_full_accuracy": 0.0,
+        "total_errors": 3,
+        "consistency_score": 1.0
+      }
+    },
+    {
+      "problem_id": "findMedianSortedArrays",
+      "problem_title": "Median of Two Sorted Arrays",
+      "runs": [
+        {
+          "run_number": 1,
+          "status": "no_code",
+          "code": "",
+          "partial_accuracy": 0.0,
+          "full_accuracy": 0.0,
+          "error_count": 1
+        },
+        {
+          "run_number": 2,
+          "status": "no_code",
+          "code": "",
+          "partial_accuracy": 0.0,
+          "full_accuracy": 0.0,
+          "error_count": 1
+        },
+        {
+          "run_number": 3,
+          "status": "no_code",
+          "code": "",
+          "partial_accuracy": 0.0,
+          "full_accuracy": 0.0,
+          "error_count": 1
+        }
+      ],
+      "summary": {
+        "avg_partial_accuracy": 0.0,
+        "avg_full_accuracy": 0.0,
+        "total_errors": 3,
+        "consistency_score": 1.0
+      }
+    },
+    {
+      "problem_id": "isMatch",
+      "problem_title": "Regular Expression Matching",
+      "runs": [
+        {
+          "run_number": 1,
+          "status": "no_code",
+          "code": "",
+          "partial_accuracy": 0.0,
+          "full_accuracy": 0.0,
+          "error_count": 1
+        },
+        {
+          "run_number": 2,
+          "status": "no_code",
+          "code": "",
+          "partial_accuracy": 0.0,
+          "full_accuracy": 0.0,
+          "error_count": 1
+        },
+        {
+          "run_number": 3,
+          "status": "no_code",
+          "code": "",
+          "partial_accuracy": 0.0,
+          "full_accuracy": 0.0,
+          "error_count": 1
+        }
+      ],
+      "summary": {
+        "avg_partial_accuracy": 0.0,
+        "avg_full_accuracy": 0.0,
+        "total_errors": 3,
+        "consistency_score": 1.0
+      }
+    }
+  ]
+}
