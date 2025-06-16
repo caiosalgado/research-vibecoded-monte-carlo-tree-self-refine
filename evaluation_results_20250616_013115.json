@@ -1,0 +1,112 @@
+{
+  "timestamp": "2025-06-16T01:31:15.202231",
+  "model": "ollama:gemma3:1b",
+  "total_problems": 3,
+  "results": [
+    {
+      "problem_id": "isPalindrome",
+      "problem_title": "Palindrome Number",
+      "status": "success",
+      "code": "def isPalindrome(x: int) -> bool:\n    \"\"\"\n    Given an integer x, return true if x is a palindrome, and false otherwise.\n    \"\"\"\n    if x < 0:\n        return False\n    \n    original_number = x\n    reversed_number = 0\n    \n    while x > 0:\n        pop = x % 10\n        reversed_number = reversed_number * 10 + pop\n        x //= 10\n        \n    return original_number == reversed_number",
+      "results": {
+        "full_accuracy": 1.0,
+        "partial_accuracy": 1.0,
+        "hidden_accuracy": 1.0,
+        "full_details": {
+          "total": 3,
+          "passed": 3,
+          "failed": 0,
+          "errors": [],
+          "accuracy": 1.0,
+          "test_type": "all"
+        },
+        "partial_details": {
+          "total": 2,
+          "passed": 2,
+          "failed": 0,
+          "errors": [],
+          "accuracy": 1.0,
+          "test_type": "partial"
+        },
+        "hidden_details": {
+          "total": 1,
+          "passed": 1,
+          "failed": 0,
+          "errors": [],
+          "accuracy": 1.0,
+          "test_type": "hidden"
+        }
+      }
+    },
+    {
+      "problem_id": "romanToInt",
+      "problem_title": "Roman to Integer",
+      "status": "success",
+      "code": "def romanToInt(s: str) -> int:\n    roman_map = {'I': 1, 'V': 5, 'X': 10, 'L': 50, 'C': 100, 'D': 500, 'M': 1000}\n    result = 0\n    prev_value = 0\n    for i in range(len(s) - 1, -1, -1):\n        current_value = roman_map[s[i]]\n        if current_value < prev_value:\n            result -= current_value\n        else:\n            result += current_value\n        prev_value = current_value\n    return result",
+      "results": {
+        "full_accuracy": 1.0,
+        "partial_accuracy": 1.0,
+        "hidden_accuracy": 1.0,
+        "full_details": {
+          "total": 5,
+          "passed": 5,
+          "failed": 0,
+          "errors": [],
+          "accuracy": 1.0,
+          "test_type": "all"
+        },
+        "partial_details": {
+          "total": 4,
+          "passed": 4,
+          "failed": 0,
+          "errors": [],
+          "accuracy": 1.0,
+          "test_type": "partial"
+        },
+        "hidden_details": {
+          "total": 1,
+          "passed": 1,
+          "failed": 0,
+          "errors": [],
+          "accuracy": 1.0,
+          "test_type": "hidden"
+        }
+      }
+    },
+    {
+      "problem_id": "twoSum",
+      "problem_title": "Two Sum",
+      "status": "success",
+      "code": "def twoSum(nums: List[int], target: int) -> List[int]:\n    \"\"\"\n    Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.\n    You may assume that each input would have exactly one solution, and you may not use the same element twice.\n    \"\"\"\n    seen = {}\n    for i, num in enumerate(nums):\n        complement = target - num\n        if complement in seen:\n            return [seen[complement], i]\n        seen[num] = i",
+      "results": {
+        "full_accuracy": 1.0,
+        "partial_accuracy": 1.0,
+        "hidden_accuracy": 1.0,
+        "full_details": {
+          "total": 3,
+          "passed": 3,
+          "failed": 0,
+          "errors": [],
+          "accuracy": 1.0,
+          "test_type": "all"
+        },
+        "partial_details": {
+          "total": 2,
+          "passed": 2,
+          "failed": 0,
+          "errors": [],
+          "accuracy": 1.0,
+          "test_type": "partial"
+        },
+        "hidden_details": {
+          "total": 1,
+          "passed": 1,
+          "failed": 0,
+          "errors": [],
+          "accuracy": 1.0,
+          "test_type": "hidden"
+        }
+      }
+    }
+  ]
+}
