@@ -4,8 +4,8 @@ Main evaluation script following the specified pseudocode structure
 """
 
 # %% Imports and Setup
-from src.core import get_problem, create_evaluation_prompt, extract_code_delimiters, CodeTester
-from aisuite_client import AISuiteClient
+from src.evaluator import get_problem, create_evaluation_prompt, extract_code_delimiters, CodeTester
+from src.client import AISuiteClient
 
 # Initialize components
 client = AISuiteClient(

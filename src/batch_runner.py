@@ -6,8 +6,8 @@ Batch runner for evaluating multiple problems
 import json
 import time
 from datetime import datetime
-from .core import get_problem, create_evaluation_prompt, extract_code_delimiters, CodeTester
-from aisuite_client import AISuiteClient
+from .evaluator import get_problem, create_evaluation_prompt, extract_code_delimiters, CodeTester
+from .client import AISuiteClient
 
 
 def run_batch_evaluation(problem_ids, model="ollama:gemma3:1b", max_problems=None):

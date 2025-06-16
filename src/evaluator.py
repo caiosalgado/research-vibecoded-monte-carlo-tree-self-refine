@@ -8,7 +8,7 @@ import re
 import json
 import traceback
 from typing import List, Optional, Any
-from aisuite_client import AISuiteClient
+from .client import AISuiteClient
 from multiprocessing import Process, Queue
 
 
