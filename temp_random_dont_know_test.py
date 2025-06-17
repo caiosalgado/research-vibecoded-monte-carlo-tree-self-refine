@@ -8,18 +8,19 @@ Testing with twoSum problem using random "I don't know" responses
 from src.evaluator import get_problem, extract_code_delimiters, CodeTester
 from src.client import AISuiteClient
 from src.prompt_templates import create_random_dont_know_prompt, call_reward
+from src.constants import EXPERT_PROGRAMMER_PROMPT, DEFAULT_PROBLEM_ID
 
 # Initialize components
 client = AISuiteClient(
     # model="ollama:gemma3:1b",
     model="ollama:qwen3:1.7b",
     # model="ollama:deepseek-r1:1.5b",
-    system_prompt="You are an expert Python programmer. Provide clean, efficient code solutions. Follow the exact format requested."
+    system_prompt=EXPERT_PROGRAMMER_PROMPT
 )
 tester = CodeTester()
 
 # Get Problem
-problem_id = "twoSum"  # Using twoSum problem
+problem_id = DEFAULT_PROBLEM_ID  # Using twoSum problem
 problem = get_problem(problem_id)
 
 print("=" * 80)

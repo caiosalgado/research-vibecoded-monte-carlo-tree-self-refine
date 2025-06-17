@@ -1,0 +1,331 @@
+{
+  "timestamp": "2025-06-16T23:32:31.921192",
+  "model": "ollama:qwen3:30b",
+  "total_problems": 9,
+  "benchmark_results": [
+    {
+      "problem_id": "isPalindrome",
+      "problem_title": "Palindrome Number",
+      "runs": [
+        {
+          "run_number": 1,
+          "status": "success",
+          "code": "def isPalindrome(x: int) -> bool:\n    if x < 0:\n        return False\n    if x == 0:\n        return True\n    if x % 10 == 0:\n        return False\n    original_x = x\n    reversed_num = 0\n    while x > 0:\n        digit = x % 10\n        reversed_num = reversed_num * 10 + digit\n        x = x // 10\n    return reversed_num == original_x",
+          "partial_accuracy": 1.0,
+          "full_accuracy": 1.0,
+          "error_count": 0
+        },
+        {
+          "run_number": 2,
+          "status": "success",
+          "code": "class Solution:\n    def isPalindrome(self, x: int) -> bool:\n        return str(x) == str(x)[::-1]",
+          "partial_accuracy": 0.0,
+          "full_accuracy": 0.0,
+          "error_count": 1
+        },
+        {
+          "run_number": 3,
+          "status": "success",
+          "code": "def isPalindrome(x: int) -> bool:\n    s = str(x)\n    return s == s[::-1]",
+          "partial_accuracy": 1.0,
+          "full_accuracy": 1.0,
+          "error_count": 0
+        }
+      ],
+      "summary": {
+        "avg_partial_accuracy": 0.6666666666666666,
+        "avg_full_accuracy": 0.6666666666666666,
+        "total_errors": 1,
+        "consistency_score": 0.0
+      }
+    },
+    {
+      "problem_id": "romanToInt",
+      "problem_title": "Roman to Integer",
+      "runs": [
+        {
+          "run_number": 1,
+          "status": "success",
+          "code": "def romanToInt(s: str) -> int:\n    roman_map = {'I':1, 'V':5, 'X':10, 'L':50, 'C':100, 'D':500, 'M':1000}\n    total = 0\n    for i in range(len(s)):\n        current_val = roman_map[s[i]]\n        next_val = roman_map[s[i+1]] if i < len(s)-1 else 0\n        if current_val < next_val:\n            total -= current_val\n        else:\n            total += current_val\n    return total",
+          "partial_accuracy": 1.0,
+          "full_accuracy": 1.0,
+          "error_count": 0
+        },
+        {
+          "run_number": 2,
+          "status": "success",
+          "code": "def romanToInt(s: str) -> int:\n    roman = {'I':1, 'V':5, 'X':10, 'L':50, 'C':100, 'D':500, 'M':1000}\n    total = 0\n    for i in range(len(s)):\n        if i < len(s)-1 and roman[s[i]] < roman[s[i+1]]:\n            total -= roman[s[i]]\n        else:\n            total += roman[s[i]]\n    return total",
+          "partial_accuracy": 1.0,
+          "full_accuracy": 1.0,
+          "error_count": 0
+        },
+        {
+          "run_number": 3,
+          "status": "success",
+          "code": "def romanToInt(s: str) -> int:\n    roman = {'I':1, 'V':5, 'X':10, 'L':50, 'C':100, 'D':500, 'M':1000}\n    total = 0\n    for i in range(len(s)):\n        current_val = roman[s[i]]\n        next_val = roman[s[i+1]] if i+1 < len(s) else 0\n        if current_val < next_val:\n            total -= current_val\n        else:\n            total += current_val\n    return total",
+          "partial_accuracy": 1.0,
+          "full_accuracy": 1.0,
+          "error_count": 0
+        }
+      ],
+      "summary": {
+        "avg_partial_accuracy": 1.0,
+        "avg_full_accuracy": 1.0,
+        "total_errors": 0,
+        "consistency_score": 1.0
+      }
+    },
+    {
+      "problem_id": "twoSum",
+      "problem_title": "Two Sum",
+      "runs": [
+        {
+          "run_number": 1,
+          "status": "success",
+          "code": "from typing import List\n\ndef twoSum(nums: List[int], target: int) -> List[int]:\n    num_dict = {}\n    for i, num in enumerate(nums):\n        complement = target - num\n        if complement in num_dict:\n            return [num_dict[complement], i]\n        num_dict[num] = i\n    return []",
+          "partial_accuracy": 1.0,
+          "full_accuracy": 1.0,
+          "error_count": 0
+        },
+        {
+          "run_number": 2,
+          "status": "success",
+          "code": "from typing import List\n\ndef twoSum(nums: List[int], target: int) -> List[int]:\n    num_dict = {}\n    for i, num in enumerate(nums):\n        complement = target - num\n        if complement in num_dict:\n            return [num_dict[complement], i]\n        num_dict[num] = i\n    return []",
+          "partial_accuracy": 1.0,
+          "full_accuracy": 1.0,
+          "error_count": 0
+        },
+        {
+          "run_number": 3,
+          "status": "success",
+          "code": "from typing import List\n\ndef twoSum(nums: List[int], target: int) -> List[int]:\n    num_dict = {}\n    for i, num in enumerate(nums):\n        complement = target - num\n        if complement in num_dict:\n            return [num_dict[complement], i]\n        num_dict[num] = i",
+          "partial_accuracy": 1.0,
+          "full_accuracy": 1.0,
+          "error_count": 0
+        }
+      ],
+      "summary": {
+        "avg_partial_accuracy": 1.0,
+        "avg_full_accuracy": 1.0,
+        "total_errors": 0,
+        "consistency_score": 1.0
+      }
+    },
+    {
+      "problem_id": "addTwoNumbers",
+      "problem_title": "Add Two Numbers",
+      "runs": [
+        {
+          "run_number": 1,
+          "status": "success",
+          "code": "def addTwoNumbers(l1: ListNode, l2: ListNode) -> ListNode:\n    dummy_head = ListNode(0)\n    current = dummy_head\n    carry = 0\n    while l1 or l2 or carry:\n        val1 = l1.val if l1 else 0\n        val2 = l2.val if l2 else 0\n        total = val1 + val2 + carry\n        digit = total % 10\n        carry = total // 10\n        current.next = ListNode(digit)\n        current = current.next\n        if l1:\n            l1 = l1.next\n        if l2:\n            l2 = l2.next\n    return dummy_head.next",
+          "partial_accuracy": 1.0,
+          "full_accuracy": 1.0,
+          "error_count": 0
+        },
+        {
+          "run_number": 2,
+          "status": "success",
+          "code": "def addTwoNumbers(l1: ListNode, l2: ListNode) -> ListNode:\n    dummy = ListNode(0)\n    current = dummy\n    carry = 0\n    while l1 or l2 or carry:\n        val1 = l1.val if l1 else 0\n        val2 = l2.val if l2 else 0\n        total = val1 + val2 + carry\n        carry = total // 10\n        current.next = ListNode(total % 10)\n        current = current.next\n        if l1:\n            l1 = l1.next\n        if l2:\n            l2 = l2.next\n    return dummy.next",
+          "partial_accuracy": 1.0,
+          "full_accuracy": 1.0,
+          "error_count": 0
+        },
+        {
+          "run_number": 3,
+          "status": "success",
+          "code": "def addTwoNumbers(l1: ListNode, l2: ListNode) -> ListNode:\n    dummy = ListNode(0)\n    current = dummy\n    carry = 0\n    while l1 or l2 or carry:\n        val1 = l1.val if l1 else 0\n        val2 = l2.val if l2 else 0\n        total = val1 + val2 + carry\n        new_node = ListNode(total % 10)\n        current.next = new_node\n        current = new_node\n        carry = total // 10\n        if l1:\n            l1 = l1.next\n        if l2:\n            l2 = l2.next\n    return dummy.next",
+          "partial_accuracy": 1.0,
+          "full_accuracy": 1.0,
+          "error_count": 0
+        }
+      ],
+      "summary": {
+        "avg_partial_accuracy": 1.0,
+        "avg_full_accuracy": 1.0,
+        "total_errors": 0,
+        "consistency_score": 1.0
+      }
+    },
+    {
+      "problem_id": "longestPalindrome",
+      "problem_title": "Longest Palindromic Substring",
+      "runs": [
+        {
+          "run_number": 1,
+          "status": "success",
+          "code": "def longestPalindrome(s: str) -> str:\n    n = len(s)\n    start = 0\n    end = 0\n\n    def expand(left: int, right: int) -> (int, int):\n        while left >= 0 and right < n and s[left] == s[right]:\n            left -= 1\n            right += 1\n        return (left + 1, right - 1)\n\n    for i in range(n):\n        l1, r1 = expand(i, i)\n        l2, r2 = expand(i, i + 1)\n\n        if r1 - l1 > end - start:\n            start, end = l1, r1\n        if r2 - l2 > end - start:\n            start, end = l2, r2\n\n    return s[start:end + 1]",
+          "partial_accuracy": 1.0,
+          "full_accuracy": 1.0,
+          "error_count": 0
+        },
+        {
+          "run_number": 2,
+          "status": "success",
+          "code": "def longestPalindrome(s: str) -> str:\n    if len(s) <= 1:\n        return s\n\n    start = 0\n    end = 0\n\n    for i in range(len(s)):\n        # Check for odd-length palindrome centered at i\n        l, r = i, i\n        while l >= 0 and r < len(s) and s[l] == s[r]:\n            l -= 1\n            r += 1\n        if r - l - 1 > end - start:\n            start = l + 1\n            end = r - 1\n\n        # Check for even-length palindrome centered between i and i+1\n        l, r = i, i + 1\n        while l >= 0 and r < len(s) and s[l] == s[r]:\n            l -= 1\n            r += 1\n        if r - l - 1 > end - start:\n            start = l + 1\n            end = r - 1\n\n    return s[start:end + 1]",
+          "partial_accuracy": 0.0,
+          "full_accuracy": 0.5,
+          "error_count": 1
+        },
+        {
+          "run_number": 3,
+          "status": "success",
+          "code": "def longestPalindrome(s: str) -> str:\n    if len(s) <= 1:\n        return s\n    start = 0\n    end = 0\n    for i in range(len(s)):\n        # Check for odd length palindromes\n        left1, right1 = i, i\n        while left1 >= 0 and right1 < len(s) and s[left1] == s[right1]:\n            left1 -= 1\n            right1 += 1\n        if right1 - left1 - 1 > end - start:\n            start = left1 + 1\n            end = right1 - 1\n        # Check for even length palindromes\n        left2, right2 = i, i + 1\n        while left2 >= 0 and right2 < len(s) and s[left2] == s[right2]:\n            left2 -= 1\n            right2 += 1\n        if right2 - left2 - 1 > end - start:\n            start = left2 + 1\n            end = right2 - 1\n    return s[start:end+1]",
+          "partial_accuracy": 0.0,
+          "full_accuracy": 0.5,
+          "error_count": 1
+        }
+      ],
+      "summary": {
+        "avg_partial_accuracy": 0.3333333333333333,
+        "avg_full_accuracy": 0.6666666666666666,
+        "total_errors": 2,
+        "consistency_score": 0.5
+      }
+    },
+    {
+      "problem_id": "maxArea",
+      "problem_title": "Container With Most Water",
+      "runs": [
+        {
+          "run_number": 1,
+          "status": "success",
+          "code": "from typing import List\n\ndef maxArea(height: List[int]) -> int:\n    left = 0\n    right = len(height) - 1\n    max_area = 0\n    while left < right:\n        current_area = min(height[left], height[right]) * (right - left)\n        if current_area > max_area:\n            max_area = current_area\n        if height[left] < height[right]:\n            left += 1\n        else:\n            right -= 1\n    return max_area",
+          "partial_accuracy": 1.0,
+          "full_accuracy": 1.0,
+          "error_count": 0
+        },
+        {
+          "run_number": 2,
+          "status": "success",
+          "code": "def maxArea(height: List[int]) -> int:\n    left = 0\n    right = len(height) - 1\n    max_area = 0\n    while left < right:\n        current_area = min(height[left], height[right]) * (right - left)\n        if current_area > max_area:\n            max_area = current_area\n        if height[left] < height[right]:\n            left += 1\n        else:\n            right -= 1\n    return max_area",
+          "partial_accuracy": 1.0,
+          "full_accuracy": 1.0,
+          "error_count": 0
+        },
+        {
+          "run_number": 3,
+          "status": "success",
+          "code": "def maxArea(height: List[int]) -> int:\n    left = 0\n    right = len(height) - 1\n    max_area = 0\n    while left < right:\n        current_area = min(height[left], height[right]) * (right - left)\n        if current_area > max_area:\n            max_area = current_area\n        if height[left] < height[right]:\n            left += 1\n        else:\n            right -= 1\n    return max_area",
+          "partial_accuracy": 1.0,
+          "full_accuracy": 1.0,
+          "error_count": 0
+        }
+      ],
+      "summary": {
+        "avg_partial_accuracy": 1.0,
+        "avg_full_accuracy": 1.0,
+        "total_errors": 0,
+        "consistency_score": 1.0
+      }
+    },
+    {
+      "problem_id": "mergeKLists",
+      "problem_title": "Merge k Sorted Lists",
+      "runs": [
+        {
+          "run_number": 1,
+          "status": "no_code",
+          "code": "",
+          "partial_accuracy": 0.0,
+          "full_accuracy": 0.0,
+          "error_count": 1
+        },
+        {
+          "run_number": 2,
+          "status": "no_code",
+          "code": "",
+          "partial_accuracy": 0.0,
+          "full_accuracy": 0.0,
+          "error_count": 1
+        },
+        {
+          "run_number": 3,
+          "status": "success",
+          "code": "from typing import List, Optional\n\nclass ListNode:\n    def __init__(self, val=0, next=None):\n        self.val = val\n        self.next = next\n\ndef mergeKLists(lists: List[Optional[ListNode]]) -> Optional[ListNode]:\n    import heapq\n\n    heap = []\n    counter = 0\n\n    # Initialize the heap with the first node of each non-empty list\n    for i, l in enumerate(lists):\n        if l:\n            heapq.heappush(heap, (l.val, i, counter, l))\n            counter += 1\n\n    dummy = ListNode(0)\n    current = dummy\n\n    # Process the heap\n    while heap:\n        val, idx, _, node = heapq.heappop(heap)\n        current.next = node\n        current = current.next\n\n        if node.next:\n            heapq.heappush(heap, (node.next.val, idx, counter, node.next))\n            counter += 1\n\n    return dummy.next",
+          "partial_accuracy": 0.0,
+          "full_accuracy": 0.0,
+          "error_count": 3
+        }
+      ],
+      "summary": {
+        "avg_partial_accuracy": 0.0,
+        "avg_full_accuracy": 0.0,
+        "total_errors": 5,
+        "consistency_score": 1.0
+      }
+    },
+    {
+      "problem_id": "findMedianSortedArrays",
+      "problem_title": "Median of Two Sorted Arrays",
+      "runs": [
+        {
+          "run_number": 1,
+          "status": "no_code",
+          "code": "",
+          "partial_accuracy": 0.0,
+          "full_accuracy": 0.0,
+          "error_count": 1
+        },
+        {
+          "run_number": 2,
+          "status": "success",
+          "code": "from typing import List\n\ndef findMedianSortedArrays(nums1: List[int], nums2: List[int]) -> float:\n    merged = sorted(nums1 + nums2)\n    n = len(merged)\n    if n % 2 == 1:\n        return float(merged[n//2])\n    else:\n        return (merged[n//2 - 1] + merged[n//2]) / 2.0",
+          "partial_accuracy": 1.0,
+          "full_accuracy": 1.0,
+          "error_count": 0
+        },
+        {
+          "run_number": 3,
+          "status": "success",
+          "code": "from typing import List\n\ndef findMedianSortedArrays(nums1: List[int], nums2: List[int]) -> float:\n    merged = sorted(nums1 + nums2)\n    n = len(merged)\n    if n % 2 == 1:\n        return float(merged[n//2])\n    else:\n        return (merged[n//2 - 1] + merged[n//2]) / 2.0",
+          "partial_accuracy": 1.0,
+          "full_accuracy": 1.0,
+          "error_count": 0
+        }
+      ],
+      "summary": {
+        "avg_partial_accuracy": 0.6666666666666666,
+        "avg_full_accuracy": 0.6666666666666666,
+        "total_errors": 1,
+        "consistency_score": 0.0
+      }
+    },
+    {
+      "problem_id": "isMatch",
+      "problem_title": "Regular Expression Matching",
+      "runs": [
+        {
+          "run_number": 1,
+          "status": "success",
+          "code": "def isMatch(s: str, p: str) -> bool:\n    m, n = len(s), len(p)\n    dp = [[False] * (n + 1) for _ in range(m + 1)]\n    dp[0][0] = True  # empty string matches empty pattern\n\n    # Initialize first row (s is empty, p is not)\n    for j in range(1, n + 1):\n        if p[j-1] == '*':\n            dp[0][j] = dp[0][j-2]\n\n    for i in range(1, m + 1):\n        for j in range(1, n + 1):\n            if p[j-1] == '*':\n                # Zero occurrence: skip the previous character and the '*'\n                dp[i][j] = dp[i][j-2]\n                # One or more occurrence: check if previous character matches\n                if p[j-2] == s[i-1] or p[j-2] == '.':\n                    dp[i][j] |= dp[i-1][j]\n            else:\n                # Check if current characters match or if it's a '.'\n                if p[j-1] == s[i-1] or p[j-1] == '.':\n                    dp[i][j] = dp[i-1][j-1]\n\n    return dp[m][n]",
+          "partial_accuracy": 1.0,
+          "full_accuracy": 1.0,
+          "error_count": 0
+        },
+        {
+          "run_number": 2,
+          "status": "success",
+          "code": "def isMatch(s: str, p: str) -> bool:\n    m, n = len(s), len(p)\n    dp = [[False] * (n + 1) for _ in range(m + 1)]\n    dp[0][0] = True  # Empty string matches empty pattern\n\n    # Handle patterns like a*, a*b*, etc. for empty string\n    for j in range(1, n + 1):\n        if p[j - 1] == '*':\n            dp[0][j] = dp[0][j - 2]\n\n    for i in range(1, m + 1):\n        for j in range(1, n + 1):\n            if p[j - 1] == '*':\n                # Case 1: Zero occurrence\n                dp[i][j] = dp[i][j - 2]\n                # Case 2: One or more occurrences\n                if p[j - 2] == s[i - 1] or p[j - 2] == '.':\n                    dp[i][j] |= dp[i - 1][j]\n            else:\n                dp[i][j] = (s[i - 1] == p[j - 1] or p[j - 1] == '.') and dp[i - 1][j - 1]\n\n    return dp[m][n]",
+          "partial_accuracy": 1.0,
+          "full_accuracy": 1.0,
+          "error_count": 0
+        },
+        {
+          "run_number": 3,
+          "status": "success",
+          "code": "def isMatch(s: str, p: str) -> bool:\n    m, n = len(s), len(p)\n    dp = [[False] * (n + 1) for _ in range(m + 1)]\n    dp[0][0] = True  # Empty string matches empty pattern\n\n    # Handle patterns like a*, b*, etc. for empty string\n    for j in range(1, n + 1):\n        if p[j-1] == '*':\n            dp[0][j] = dp[0][j-2]\n\n    for i in range(1, m + 1):\n        for j in range(1, n + 1):\n            if p[j-1] == '*':\n                # Check if the previous character in p matches the current character in s\n                if p[j-2] == s[i-1] or p[j-2] == '.':\n                    dp[i][j] = dp[i-1][j]  # Match one or more\n                # Also check if the current * can be ignored\n                dp[i][j] = dp[i][j] or dp[i][j-2]\n            else:\n                # Check if current characters match and previous state is True\n                if p[j-1] == s[i-1] or p[j-1] == '.':\n                    dp[i][j] = dp[i-1][j-1]\n    return dp[m][n]",
+          "partial_accuracy": 1.0,
+          "full_accuracy": 1.0,
+          "error_count": 0
+        }
+      ],
+      "summary": {
+        "avg_partial_accuracy": 1.0,
+        "avg_full_accuracy": 1.0,
+        "total_errors": 0,
+        "consistency_score": 1.0
+      }
+    }
+  ]
+}

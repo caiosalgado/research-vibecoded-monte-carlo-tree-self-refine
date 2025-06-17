@@ -6,11 +6,12 @@ Main evaluation script following the specified pseudocode structure
 # %% Imports and Setup
 from src.evaluator import get_problem, create_evaluation_prompt, extract_code_delimiters, CodeTester
 from src.client import AISuiteClient
+from src.constants import DEFAULT_MODEL, EXPERT_PROGRAMMER_PROMPT
 
 # Initialize components
 client = AISuiteClient(
-    model="ollama:gemma3:1b",
-    system_prompt="You are an expert Python programmer. Provide clean, efficient code solutions. Follow the exact format requested."
+    model=DEFAULT_MODEL,
+    system_prompt=EXPERT_PROGRAMMER_PROMPT
 )
 tester = CodeTester()
 

@@ -9,10 +9,11 @@ import json
 import traceback
 from typing import List, Optional, Any
 from .client import AISuiteClient
+from .constants import PROBLEMS_DATA_FILE
 from multiprocessing import Process, Queue
 
 
-def get_problem(problem_id, data_file='data/leetcode_problems.json'):
+def get_problem(problem_id, data_file=PROBLEMS_DATA_FILE):
     """Get problem data by ID"""
     with open(data_file, 'r') as f:
         data = json.load(f)

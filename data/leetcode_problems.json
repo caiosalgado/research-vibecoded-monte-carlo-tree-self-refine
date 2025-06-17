@@ -80,9 +80,9 @@
     },
     {
       "id": "mergeKLists",
-      "title": "Merge k Sorted Lists",
+      "title": "Merge k Sorted Lists", 
       "description": "You are given an array of k linked-lists lists, each linked-list is sorted in ascending order. Merge all the linked-lists into one sorted linked-list and return it.",
-      "constraints": "k == lists.length\n0 <= k <= 10^4\n0 <= lists[i].length <= 500\n-10^4 <= lists[i][j] <= 10^4",
+      "constraints": "k == lists.length\n0 <= k <= 10^4\n0 <= lists[i].length <= 500\n-10^4 <= lists[i][j] <= 10^4\nlists[i] is sorted in ascending order\nThe sum of lists[i].length will not exceed 10^4",
       "function_signature": "def mergeKLists(lists: List[Optional[ListNode]]) -> Optional[ListNode]:",
       "initial_code": "class ListNode:\n    def __init__(self, val=0, next=None):\n        self.val = val\n        self.next = next\n\ndef mergeKLists(lists: List[Optional[ListNode]]) -> Optional[ListNode]:\n    # Your solution here\n    pass",
       "tests": [
@@ -91,11 +91,11 @@
           "expected": [1,1,2,3,4,4,5,6]
         },
         {
-          "input": [[]],
+          "input": [],
           "expected": []
         },
         {
-          "input": [[[]]],
+          "input": [[]],
           "expected": []
         }
       ]

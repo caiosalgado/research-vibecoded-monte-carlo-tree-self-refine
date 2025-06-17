@@ -1,0 +1,10 @@
+problem_id,problem_title,run1_partial,run1_full,run1_status,run2_partial,run2_full,run2_status,run3_partial,run3_full,run3_status,avg_partial_accuracy,avg_full_accuracy,total_errors,consistency_score
+isPalindrome,Palindrome Number,1.0,1.0,success,0.0,0.0,success,1.0,1.0,success,0.6666666666666666,0.6666666666666666,1,0.0
+romanToInt,Roman to Integer,1.0,1.0,success,1.0,1.0,success,1.0,1.0,success,1.0,1.0,0,1.0
+twoSum,Two Sum,1.0,1.0,success,1.0,1.0,success,1.0,1.0,success,1.0,1.0,0,1.0
+addTwoNumbers,Add Two Numbers,1.0,1.0,success,1.0,1.0,success,1.0,1.0,success,1.0,1.0,0,1.0
+longestPalindrome,Longest Palindromic Substring,1.0,1.0,success,0.0,0.5,success,0.0,0.5,success,0.3333333333333333,0.6666666666666666,2,0.5
+maxArea,Container With Most Water,1.0,1.0,success,1.0,1.0,success,1.0,1.0,success,1.0,1.0,0,1.0
+mergeKLists,Merge k Sorted Lists,0.0,0.0,no_code,0.0,0.0,no_code,0.0,0.0,success,0.0,0.0,5,1.0
+findMedianSortedArrays,Median of Two Sorted Arrays,0.0,0.0,no_code,1.0,1.0,success,1.0,1.0,success,0.6666666666666666,0.6666666666666666,1,0.0
+isMatch,Regular Expression Matching,1.0,1.0,success,1.0,1.0,success,1.0,1.0,success,1.0,1.0,0,1.0

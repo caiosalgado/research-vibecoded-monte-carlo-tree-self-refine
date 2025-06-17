@@ -7,5 +7,9 @@ from src.batch_runner import run_simple_benchmark
 
 if __name__ == "__main__":
     # run_simple_benchmark("ollama:gemma3:1b") 
-    run_simple_benchmark("ollama:deepseek-r1:1.5b")
-    run_simple_benchmark("ollama:qwen3:1.7b")
+    # run_simple_benchmark("ollama:deepseek-r1:1.5b")
+    # run_simple_benchmark("ollama:qwen3:1.7b")
+    run_simple_benchmark("ollama:qwen3:32b")
+    run_simple_benchmark("ollama:qwen3:30b")
+    run_simple_benchmark("ollama:phi4:latest")
+    run_simple_benchmark("ollama:gemma3:27b")

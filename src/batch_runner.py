@@ -9,6 +9,7 @@ import time
 from datetime import datetime
 from .evaluator import get_problem, create_evaluation_prompt, extract_code_delimiters, CodeTester
 from .client import AISuiteClient
+from .constants import DEFAULT_MODEL, EXPERT_PROGRAMMER_PROMPT, PROBLEMS_DATA_FILE
 
 
 def get_model_name_for_filename(model_string):
@@ -19,19 +20,19 @@ def get_model_name_for_filename(model_string):
     return model_string.replace(":", "-")
 
 
-def run_batch_evaluation(problem_ids, model="ollama:gemma3:1b", max_problems=None):
+def run_batch_evaluation(problem_ids, model=DEFAULT_MODEL, max_problems=None):
     """Run evaluation on multiple problems"""
     
     # Initialize components
     client = AISuiteClient(
         model=model,
-        system_prompt="You are an expert Python programmer. Provide clean, efficient code solutions. Follow the exact format requested."
+        system_prompt=EXPERT_PROGRAMMER_PROMPT
     )
     tester = CodeTester()
     
     # Load all problems if problem_ids is None
     if problem_ids is None:
-        with open('data/leetcode_problems.json', 'r') as f:
+        with open(PROBLEMS_DATA_FILE, 'r') as f:
             data = json.load(f)
         problem_ids = [p['id'] for p in data['problems']]
     
@@ -181,7 +182,7 @@ def save_results(results, filename=None):
     return filename
 
 
-def run_simple_benchmark(model_name="ollama:gemma3:1b"):
+def run_simple_benchmark(model_name=DEFAULT_MODEL):
     """
     Run comprehensive benchmark with 3 runs per problem
     Automatically generates both CSV and JSON reports
@@ -192,12 +193,12 @@ def run_simple_benchmark(model_name="ollama:gemma3:1b"):
     # Initialize components
     client = AISuiteClient(
         model=model_name,
-        system_prompt="You are an expert Python programmer. Provide clean, efficient code solutions. Follow the exact format requested."
+        system_prompt=EXPERT_PROGRAMMER_PROMPT
     )
     tester = CodeTester()
     
     # Load all problems
-    with open('data/leetcode_problems.json', 'r') as f:
+    with open(PROBLEMS_DATA_FILE, 'r') as f:
         data = json.load(f)
     problems = data['problems']
     
