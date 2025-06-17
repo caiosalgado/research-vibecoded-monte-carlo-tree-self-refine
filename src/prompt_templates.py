@@ -79,38 +79,6 @@ def create_random_dont_know_prompt(problem_data):
     return random_response
 
 
-def create_evaluation_prompt(problem_data):
-    """Create structured prompt with hidden last test case - original version"""
-    visible_tests = problem_data['tests'][:-1]  # Hide last test
-    
-    # Format visible test cases
-    test_cases_str = ""
-    for i, test in enumerate(visible_tests, 1):
-        test_cases_str += f"Test {i}: Input {test['input']} → Expected Output: {test['expected']}\n"
-    
-    prompt = f"""Solve this coding problem:
-
-**Problem:** {problem_data['title']}
-
-**Description:** {problem_data['description']}
-
-**Constraints:** {problem_data['constraints']}
-
-**Visible Test Cases:**
-{test_cases_str}
-**Note:** There is 1 additional hidden test case for evaluation.
-
-**CRITICAL FORMATTING:** Provide your solution in this EXACT format:
-```python
-{problem_data['function_signature']}
-    # Your implementation here
-    pass
-```
-
-Respond with ONLY the function code block. No explanations, no additional text."""
-    
-    return prompt
-
 
 def call_reward(llm_answer, partial_accuracy_feedback, problem_data):
     """

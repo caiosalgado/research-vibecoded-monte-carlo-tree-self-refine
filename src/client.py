@@ -5,10 +5,11 @@ A simple wrapper for AISuite with configurable prompts and response handling
 """
 
 import aisuite as ai
+from .constants import DEFAULT_MODEL, DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE, OLLAMA_TIMEOUT
 
 
 class AISuiteClient:
-    def __init__(self, model="ollama:gemma3:1b", system_prompt="You are a helpful assistant.", temperature=0.7):
+    def __init__(self, model=DEFAULT_MODEL, system_prompt=DEFAULT_SYSTEM_PROMPT, temperature=DEFAULT_TEMPERATURE):
         """
         Initialize the AISuite client
         
@@ -18,6 +19,11 @@ class AISuiteClient:
             temperature (float): Temperature for response generation
         """
         self.client = ai.Client()
+        self.client.configure({
+            "ollama": {
+                "timeout": OLLAMA_TIMEOUT,
+            }
+        })
         self.model = model
         self.system_prompt = system_prompt
         self.temperature = temperature
