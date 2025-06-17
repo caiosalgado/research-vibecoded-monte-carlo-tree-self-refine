@@ -24,6 +24,8 @@ def get_problem(problem_id, data_file='data/leetcode_problems.json'):
     raise ValueError(f"Problem with ID '{problem_id}' not found")
 
 
+# TODO: Remove this function, since we are using the prompt template file now.
+# TODO: Before removing, make sure they are the same. This version is the right one.
 def create_evaluation_prompt(problem_data):
     """Create structured prompt with hidden last test case"""
     visible_tests = problem_data['tests'][:-1]  # Hide last test
@@ -179,6 +181,18 @@ class CodeTester:
             'accuracy': 0.0,
             'test_type': test_type
         }
+        
+        # Safety check: Handle empty or None code
+        if not code or not code.strip():
+            results['failed'] = results['total']  # All tests failed due to no code
+            results['errors'].append({
+                'error_type': 'no_code_provided',
+                'error_message': 'No code was provided or extracted from the response',
+                'input': 'N/A',
+                'expected': 'Valid Python function',
+                'actual': 'Empty or None'
+            })
+            return results
         
         if not tests:
             return results
