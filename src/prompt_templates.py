@@ -128,7 +128,7 @@ def call_reward(llm_answer, partial_accuracy_feedback, problem_data):
 
 {feedback_str}
 
-**Task:** Analyze this Answer Strictly and Critic, and point out every flaw for every possible imperfect to minus every possible score! You need to be very harsh and mean in calculating grades, and never give full marks to ensure that the marks are authoritative.
+**Task:** Analyze this Answer Strictly and Critic, and point out every flaw for every possible imperfect to minus every possible score! You need to be very harsh in calculating grades, and never give full marks to ensure that the marks are authoritative.
 
 Output a score between [-100,+100], i.e. from -100 to +100.
 
@@ -143,6 +143,159 @@ Example response:
     'analysis': 'This response demonstrates major flaws in multiple areas. The code contains serious logic errors, fails to handle edge cases properly, and shows poor optimization. The test results reveal critical failures, with an unacceptably low accuracy rate. The code structure violates basic principles of clean coding, lacks proper error handling, and fails to meet the specified requirements. The implementation is inefficient and would likely fail in production scenarios.',
     'score': -85
 }}
+"""
+    
+    return prompt
+
+
+def create_reflection_prompt(problem_data, llm_answer, test_performance):
+    """
+    Create a reflection prompt for critical analysis of the current answer
+    
+    Args:
+        problem_data: Problem data dictionary
+        llm_answer: The LLM's current answer
+        test_performance: Test performance results
+        
+    Returns:
+        str: Reflection prompt for self-criticism
+    """
+    # Format test performance
+    performance_str = ""
+    if test_performance:
+        accuracy = test_performance.get('accuracy', 0)
+        passed = test_performance.get('passed', 0)
+        total = test_performance.get('total', 0)
+        errors = test_performance.get('errors', [])
+        
+        performance_str = f"""
+**Test Performance:**
+- Tests Passed: {passed}/{total} ({accuracy:.1%})
+- Accuracy Score: {accuracy:.3f}
+"""
+        
+        if errors:
+            performance_str += "\n**Errors Found:**\n"
+            for i, error in enumerate(errors[:3], 1):  # Show first 3 errors
+                error_type = error.get('error_type', 'unknown')
+                expected = error.get('expected', 'N/A')
+                actual = error.get('actual', 'N/A')
+                performance_str += f"{i}. {error_type}: Expected {expected}, Got {actual}\n"
+    
+    prompt = f"""Analyze the following coding solution and provide critical feedback:
+
+**Problem:** {problem_data['title']}
+
+**Description:** {problem_data['description']}
+
+**Constraints:** {problem_data['constraints']}
+
+**Current Answer:**
+{llm_answer}
+
+{performance_str}
+
+**Task:** Provide me with a reflection or feedback to correct this answer better. Analyze this answer strictly and critically. Point out every flaw and every possible imperfection to subtract every possible score. Let's think step by step.
+
+Provide detailed, actionable feedback that can be used to improve the solution.
+"""
+    
+    return prompt
+
+
+def create_improvement_prompt(problem_data, original_answer, test_performance, reflection):
+    """
+    Create an improvement prompt that uses reflection to generate better code
+    
+    Args:
+        problem_data: Problem data dictionary
+        original_answer: The original LLM answer
+        test_performance: Test performance results
+        reflection: Critical reflection from the previous step
+        
+    Returns:
+        str: Improvement prompt for generating better code
+    """
+    visible_tests = problem_data['tests'][:-1]  # Hide last test
+    
+    # Format visible test cases
+    test_cases_str = ""
+    for i, test in enumerate(visible_tests, 1):
+        test_cases_str += f"Test {i}: Input {test['input']} → Expected Output: {test['expected']}\n"
+    
+    # Format test performance
+    performance_str = ""
+    if test_performance:
+        accuracy = test_performance.get('accuracy', 0)
+        passed = test_performance.get('passed', 0)
+        total = test_performance.get('total', 0)
+        errors = test_performance.get('errors', [])
+        
+        performance_str = f"""
+**Previous Performance:**
+- Tests Passed: {passed}/{total} ({accuracy:.1%})
+- Accuracy Score: {accuracy:.3f}
+"""
+        
+        if errors:
+            performance_str += "\n**Previous Errors:**\n"
+            for i, error in enumerate(errors[:3], 1):  # Show first 3 errors
+                error_type = error.get('error_type', 'unknown')
+                expected = error.get('expected', 'N/A')
+                actual = error.get('actual', 'N/A')
+                performance_str += f"{i}. {error_type}: Expected {expected}, Got {actual}\n"
+    
+    prompt = f"""Improve the following coding solution based on critical feedback:
+
+**Problem:** {problem_data['title']}
+
+**Description:** {problem_data['description']}
+
+**Constraints:** {problem_data['constraints']}
+
+**Visible Test Cases:**
+{test_cases_str}
+**Note:** There is 1 additional hidden test case for evaluation.
+
+**Previous Answer:**
+{original_answer}
+
+{performance_str}
+
+**Critical Reflection:**
+{reflection}
+
+**Task:** Using the reflection above, create an improved solution that addresses all the identified issues. Think step by step and ensure your solution handles all edge cases properly.
+
+STRICT OUTPUT FORMAT - DO NOT CHANGE THIS FORMAT:
+1. Your entire reply must contain **EXACTLY** three sections, in this order:
+    - [reasoning process]
+    - [verification]
+    - [code]
+
+2. Template (copy this and replace only the inner content):
+
+[reasoning process]
+... your reasoning process here, incorporating the feedback ...
+
+[verification]
+... your verification here, addressing the previous issues ...
+
+[code]
+```python
+{problem_data['function_signature']}
+    # Your improved implementation here
+    pass
+```
+
+3. Additional rules:
+
+- Do **NOT** add text outside these three sections.
+- Place the `[code]` tag directly above the opening ```python and close the block with ``` (nothing after it).
+- Keep the function signature **EXACTLY** as it is.
+- Address all issues mentioned in the reflection.
+
+Let's think step by step.
 """
     
     return prompt

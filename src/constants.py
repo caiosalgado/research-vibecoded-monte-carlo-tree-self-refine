@@ -24,3 +24,7 @@ OLLAMA_TIMEOUT = 600
 
 # MCTS settings
 REWARD_PARSING_RETRIES = 3 
+
+# UCT (Upper Confidence Bound applied to Trees) settings
+UCT_EXPLORATION_CONSTANT = 1.414  # sqrt(2) - common default value
+UCT_EPSILON = 1e-6  # Small constant to avoid division by zero 
