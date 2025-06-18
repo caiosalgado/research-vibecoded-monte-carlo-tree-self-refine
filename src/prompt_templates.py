@@ -6,6 +6,8 @@ Contains various prompt templates for different types of model evaluation
 
 import random
 
+from .constants import DONT_KNOW_RESPONSES
+
 
 def create_weak_answer(problem_data):
     """Create structured prompt with reasoning process and verification sections"""
@@ -64,17 +66,8 @@ Let's think step by step.
 def create_random_dont_know_prompt(problem_data):
     """Generate a random 'I don't know' response instead of solving the problem"""
     
-    dont_know_responses = [
-        "I Don't Know",
-        "I can't understand this question.",
-        "I can't help with this question.",
-        "I don't know how to solve this question.",
-        "I don't know the answer to this question.",
-        "I don't know the answer to this question, sorry."
-    ]
-    
-    # Select a random response
-    random_response = random.choice(dont_know_responses)
+    # Select a random response from constants
+    random_response = random.choice(DONT_KNOW_RESPONSES)
     
     return random_response
 
@@ -134,14 +127,20 @@ Output a score between [-100,+100], i.e. from -100 to +100.
 
 Provide your response in the following JSON format:
 {{
-    'analysis': 'Your detailed analysis here',
-    'score': integer_score_between_minus_100_and_100
+    "analysis": "Your detailed analysis here",
+    "score": integer_score_between_minus_100_and_100
 }}
 
-Example response:
+Example response 1:
 {{
-    'analysis': 'This response demonstrates major flaws in multiple areas. The code contains serious logic errors, fails to handle edge cases properly, and shows poor optimization. The test results reveal critical failures, with an unacceptably low accuracy rate. The code structure violates basic principles of clean coding, lacks proper error handling, and fails to meet the specified requirements. The implementation is inefficient and would likely fail in production scenarios.',
-    'score': -85
+    "analysis": "This response ... (your analysis here)",
+    "score": -85
+}}
+
+Example response 2:
+{{
+    "analysis": "This response ... (your analysis here)",
+    "score": 85
 }}
 """
     

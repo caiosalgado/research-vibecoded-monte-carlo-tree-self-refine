@@ -36,7 +36,7 @@ class AISuiteClient:
         """Set the model to use"""
         self.model = model
     
-    def respond(self, user_prompt, print_response=True):
+    def respond(self, user_prompt, print_response=False):
         """
         Get response from the AI model
         

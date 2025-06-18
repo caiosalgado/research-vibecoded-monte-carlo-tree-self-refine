@@ -62,10 +62,12 @@ Respond with ONLY the function code block. No explanations, no additional text."
 
 def extract_code_delimiters(response):
     """Extract code from structured response"""
-    pattern = r'```python\s*(.*?)```'
-    matches = re.findall(pattern, response, re.DOTALL)
-    if matches:
-        return matches[0].strip()
+    from .regex_patterns import regex_extract_code_from_markdown
+    
+    # Try regex patterns first
+    code = regex_extract_code_from_markdown(response)
+    if code:
+        return code
     
     # Fallback: try to find function definition
     lines = response.split('\n')

@@ -9,3 +9,8 @@ dependencies = [
     "docstring-parser>=0.16",
     "ipykernel>=6.29.5",
 ]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.1",
+]

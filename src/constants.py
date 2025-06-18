@@ -28,3 +28,13 @@ REWARD_PARSING_RETRIES = 3
 # UCT (Upper Confidence Bound applied to Trees) settings
 UCT_EXPLORATION_CONSTANT = 1.414  # sqrt(2) - common default value
 UCT_EPSILON = 1e-6  # Small constant to avoid division by zero 
+
+# Don't know response templates
+DONT_KNOW_RESPONSES = [
+    "I Don't Know",
+    "I can't understand this question.",
+    "I can't help with this question.",
+    "I don't know how to solve this question.",
+    "I don't know the answer to this question.",
+    "I don't know the answer to this question, sorry."
+]
