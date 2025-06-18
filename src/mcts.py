@@ -233,18 +233,18 @@ class MCTS:
                 {"role": "assistant", "content": child.response}
             ]
             
-            debug_printer.llm_response(child.response)
+            debug_printer.llm_response(child.response, child.name)
                 
         else:
             debug_printer.step_generating_prompt(prompt_type.value)
             
             # For other prompt types, generate prompt and get LLM response
             prompt = generate_prompt(child.problem_data, prompt_type)
-            debug_printer.prompt_sent(prompt)
+            debug_printer.prompt_sent(prompt, child.name)
             
             debug_printer.step_sending_prompt_to_llm()
             child.response = self.llm.respond(prompt, print_response=False)
-            debug_printer.llm_response(child.response)
+            debug_printer.llm_response(child.response, child.name)
             
             child.conversation_history = [
                 {"role": "system", "content": self.llm.system_prompt},
@@ -301,7 +301,7 @@ class MCTS:
                 evaluation_results, 
                 child.problem_data
             )
-            debug_printer.prompt_sent(reward_prompt, truncate=True)
+            debug_printer.prompt_sent(reward_prompt, child.name, truncate=False)
             
             # Get reward with retry mechanism
             debug_printer.step_parsing_reward()
@@ -342,7 +342,7 @@ class MCTS:
             
             # Try to parse the reward
             parsed_reward = self._parse_reward(reward_response, attempt + 1)
-            debug_printer.reward_parsing(reward_response, parsed_reward, attempt + 1)
+            debug_printer.reward_parsing(reward_response, parsed_reward, child.name, attempt + 1)
             
             if parsed_reward is not None:  # Successfully parsed
                 debug_printer.reward_parsed_on_attempt_success(attempt + 1, parsed_reward)
@@ -561,11 +561,11 @@ class MCTS:
             node.response,
             node.evaluation_results
         )
-        debug_printer.prompt_sent(reflection_prompt, truncate=True)
+        debug_printer.prompt_sent(reflection_prompt, node.name, truncate=False)
         
         debug_printer.step_getting_reflection_from_llm()
         reflection = self.llm.respond(reflection_prompt, print_response=False)
-        debug_printer.llm_response(reflection, truncate=True)
+        debug_printer.llm_response(reflection, node.name, truncate=False)
         
         debug_printer.reflection_generated_success(len(reflection))
         debug_printer.reflection_generated(len(reflection))
@@ -593,12 +593,12 @@ class MCTS:
             original_node.evaluation_results,
             reflection
         )
-        debug_printer.prompt_sent(improvement_prompt, truncate=True)
+        debug_printer.prompt_sent(improvement_prompt, refined_name, truncate=False)
         
         # Generate improved response
         debug_printer.step_getting_improved_response()
         improved_response = self.llm.respond(improvement_prompt, print_response=False)
-        debug_printer.llm_response(improved_response, truncate=True)
+        debug_printer.llm_response(improved_response, refined_name, truncate=False)
         
         # Create refined node
         refined_node = Node(
@@ -685,7 +685,7 @@ class MCTS:
             node.evaluation_results,
             node.problem_data
         )
-        debug_printer.prompt_sent(reward_prompt, truncate=True)
+        debug_printer.prompt_sent(reward_prompt, node.name, truncate=False)
         
         return self._parse_reward_with_retry(reward_prompt, node)
     

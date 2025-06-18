@@ -5,6 +5,7 @@ Debug utilities for MCTS debugging with consistent formatting
 
 from typing import Dict, Any, Optional, List
 import json
+import textwrap
 from datetime import datetime
 
 
@@ -69,49 +70,75 @@ class DebugPrinter:
             print(f"   {details}")
         print("-" * 60)
         
-    def prompt_sent(self, prompt: str, truncate: bool = False):
+    def prompt_sent(self, prompt: str, node_name: str = None, truncate: bool = False):
         """Print sent prompt with formatting"""
         if not self.enabled:
             return
             
-        print("📤 PROMPT SENT TO LLM:")
-        print("┌" + "─" * 58 + "┐")
+        header = "📤 PROMPT SENT TO LLM"
+        if node_name:
+            header += f" by {node_name}"
+        header += ":"
+        print(header)
         
-        if truncate and len(prompt) > 500:
+        box_width = 78  # Increased by 20 characters
+        print("┌" + "─" * box_width + "┐")
+        
+        if truncate and len(prompt) > 1000:
             lines = prompt.split('\n')
-            if len(lines) > 20:
-                displayed_lines = lines[:10] + ['...'] + lines[-10:]
+            if len(lines) > 40:
+                displayed_lines = lines[:20] + ['...'] + lines[-20:]
                 prompt_display = '\n'.join(displayed_lines)
             else:
-                prompt_display = prompt[:500] + "..." if len(prompt) > 500 else prompt
+                prompt_display = prompt[:1000] + "..." if len(prompt) > 1000 else prompt
         else:
             prompt_display = prompt
             
+        # Use textwrap to wrap long lines instead of truncating
         for line in prompt_display.split('\n'):
-            print(f"│ {line:<56} │")
-        print("└" + "─" * 58 + "┘")
+            if len(line) <= box_width - 4:  # Account for "│ " and " │"
+                print(f"│ {line:<{box_width-2}} │")
+            else:
+                # Wrap long lines
+                wrapped_lines = textwrap.wrap(line, width=box_width-4)
+                for wrapped_line in wrapped_lines:
+                    print(f"│ {wrapped_line:<{box_width-2}} │")
+        print("└" + "─" * box_width + "┘")
         
-    def llm_response(self, response: str, truncate: bool = False):
+    def llm_response(self, response: str, node_name: str = None, truncate: bool = False):
         """Print LLM response with formatting"""
         if not self.enabled:
             return
             
-        print("📥 LLM RESPONSE:")
-        print("┌" + "─" * 58 + "┐")
+        header = "📥 LLM RESPONSE"
+        if node_name:
+            header += f" from {node_name}"
+        header += ":"
+        print(header)
         
-        if truncate and len(response) > 500:
+        box_width = 78  # Increased by 20 characters
+        print("┌" + "─" * box_width + "┐")
+        
+        if truncate and len(response) > 1000:
             lines = response.split('\n')
-            if len(lines) > 20:
-                displayed_lines = lines[:10] + ['...'] + lines[-10:]
+            if len(lines) > 40:
+                displayed_lines = lines[:20] + ['...'] + lines[-20:]
                 response_display = '\n'.join(displayed_lines)
             else:
-                response_display = response[:500] + "..." if len(response) > 500 else response
+                response_display = response[:1000] + "..." if len(response) > 1000 else response
         else:
             response_display = response
             
+        # Use textwrap to wrap long lines instead of truncating
         for line in response_display.split('\n'):
-            print(f"│ {line:<56} │")
-        print("└" + "─" * 58 + "┘")
+            if len(line) <= box_width - 4:  # Account for "│ " and " │"
+                print(f"│ {line:<{box_width-2}} │")
+            else:
+                # Wrap long lines
+                wrapped_lines = textwrap.wrap(line, width=box_width-4)
+                for wrapped_line in wrapped_lines:
+                    print(f"│ {wrapped_line:<{box_width-2}} │")
+        print("└" + "─" * box_width + "┘")
         
     def code_extraction(self, code: str, success: bool):
         """Print code extraction result"""
@@ -152,19 +179,38 @@ class DebugPrinter:
         else:
             print("   ❌ No evaluation results available")
             
-    def reward_parsing(self, raw_response: str, parsed_value: Optional[float], attempt: int = 1):
+    def reward_parsing(self, raw_response: str, parsed_value: Optional[float], node_name: str = None, attempt: int = 1):
         """Print reward parsing attempt"""
         if not self.enabled:
             return
             
-        print(f"🎯 REWARD PARSING (Attempt {attempt}):")
+        header = f"🎯 REWARD PARSING (Attempt {attempt})"
+        if node_name:
+            header += f" for {node_name}"
+        header += ":"
+        print(header)
+        
         print("Raw LLM Response:")
-        print("┌" + "─" * 38 + "┐")
-        for line in raw_response.split('\n')[:10]:  # Show first 10 lines
-            print(f"│ {line:<36} │")
-        if len(raw_response.split('\n')) > 10:
-            print("│ ...                                │")
-        print("└" + "─" * 38 + "┘")
+        box_width = 58  # Increased by 20 characters
+        print("┌" + "─" * box_width + "┐")
+        
+        # Show more lines and use proper wrapping
+        response_lines = raw_response.split('\n')
+        lines_to_show = response_lines[:20] if len(response_lines) > 20 else response_lines
+        
+        for line in lines_to_show:
+            if len(line) <= box_width - 4:  # Account for "│ " and " │"
+                print(f"│ {line:<{box_width-2}} │")
+            else:
+                # Wrap long lines
+                wrapped_lines = textwrap.wrap(line, width=box_width-4)
+                for wrapped_line in wrapped_lines:
+                    print(f"│ {wrapped_line:<{box_width-2}} │")
+                    
+        if len(response_lines) > 20:
+            print("│ " + "." * (box_width-4) + " │")
+            print("│ " + f"({len(response_lines)-20} more lines...)".center(box_width-4) + " │")
+        print("└" + "─" * box_width + "┘")
         
         if parsed_value is not None:
             print(f"✅ Parsed Reward: {parsed_value}")
@@ -623,6 +669,80 @@ class DebugPrinter:
     def create_refined_node_name(self, original_name: str) -> str:
         """Create refined node name"""
         return f"{original_name}.refined"
+
+    def detailed_node_information(self, mcts: Any, preview_chars: int = 30):
+        """Print detailed information for every node with truncated previews.
+        Args:
+            mcts: The MCTS instance containing the nodes.
+            preview_chars: Number of characters to preview for response / code / reflection.
+        """
+        if not self.enabled:
+            return
+        try:
+            print("\n📊 Detailed Node Information:")
+            for node_name in mcts.get_nodes():
+                node = mcts.nodes[node_name]
+
+                # Create previews
+                def _preview(text: str) -> str:
+                    if not text:
+                        return ""
+                    text_single_line = text.replace("\n", " ")
+                    return (text_single_line[:preview_chars] + "…") if len(text_single_line) > preview_chars else text_single_line
+
+                response_preview = _preview(node.response)
+                code_preview = _preview(node.code)
+                reflection_preview = _preview(getattr(node, "reflection", "")) if hasattr(node, "reflection") else ""
+
+                # Derived metrics
+                has_code = "✅" if node.code.strip() else "❌"
+                num_children = len(node.children)
+                children_list = [child.name for child in node.children] if node.children else []
+                parent_name = node.parent.name if node.parent else "None"
+                partial_acc = (
+                    f"{node.evaluation_results.get('accuracy', 0):.1%}"
+                    if node.evaluation_results else "N/A"
+                )
+                refined_answer = getattr(node, "parent_node_name", None) or "N/A"
+                
+                # Handle reward comparison logic properly
+                if node_name == "None":
+                    # Root node - no meaningful reward/UCT comparison
+                    is_reward_better = "➖"
+                    reward_display = "N/A"
+                    uct_display = "N/A"
+                elif node.parent and node.parent.name == "None":
+                    # Direct children of root - no comparison since root has no meaningful reward
+                    is_reward_better = "🆕"  # New node indicator
+                    reward_display = f"{node.reward:.3f}"
+                    uct_display = f"{node.uct_value:.3f}"
+                else:
+                    # Regular nodes - compare with meaningful parent rewards
+                    is_reward_better = (
+                        "🔺" if node.parent and node.reward > node.parent.reward else
+                        "🔻" if node.parent and node.reward < node.parent.reward else
+                        "➖"
+                    )
+                    reward_display = f"{node.reward:.3f}"
+                    uct_display = f"{node.uct_value:.3f}"
+
+                # Print block per node
+                print(f"\n{node_name}:")
+                print(f"  response_preview   : {response_preview}")
+                print(f"  code_preview       : {code_preview}")
+                print(f"  visit_count        : {node.visit_count}")
+                print(f"  uct_value          : {uct_display}")
+                print(f"  reward             : {reward_display}")
+                print(f"  has_code           : {has_code}")
+                print(f"  reflection_preview : {reflection_preview or 'N/A'}")
+                print(f"  num_children       : {num_children}")
+                print(f"  children_list      : {children_list}")
+                print(f"  partial_accuracy   : {partial_acc}")
+                print(f"  parent             : {parent_name}")
+                print(f"  refined_answer     : {refined_answer}")
+                print(f"  is_reward_better   : {is_reward_better}")
+        except Exception as e:
+            self.warning(f"Failed to print detailed node information: {e}")
 
 
 # Global debug printer instance

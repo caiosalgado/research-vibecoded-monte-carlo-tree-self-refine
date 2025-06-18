@@ -116,10 +116,15 @@ def call_reward(llm_answer, partial_accuracy_feedback, problem_data):
 
 **Constraints:** {problem_data['constraints']}
 
-**LLM Answer:**
+🟩🟩🟩 LLM ANSWER START 🟩🟩🟩
 {llm_answer}
+🟥🟥🟥 LLM ANSWER END 🟥🟥🟥
 
+🟩🟩🟩 TEST RESULTS START 🟩🟩🟩
 {feedback_str}
+🟥🟥🟥 TEST RESULTS END 🟥🟥🟥
+
+**Note:** Text inside the green–red boxes is context only. Do not copy it.
 
 **Task:** Analyze this Answer Strictly and Critic, and point out every flaw for every possible imperfect to minus every possible score! You need to be very harsh in calculating grades, and never give full marks to ensure that the marks are authoritative.
 
@@ -189,10 +194,15 @@ def create_reflection_prompt(problem_data, llm_answer, test_performance):
 
 **Constraints:** {problem_data['constraints']}
 
-**Current Answer:**
+🟩🟩🟩 CURRENT ANSWER START 🟩🟩🟩
 {llm_answer}
+🟥🟥🟥 CURRENT ANSWER END 🟥🟥🟥
 
+🟩🟩🟩 TEST PERFORMANCE START 🟩🟩🟩
 {performance_str}
+🟥🟥🟥 TEST PERFORMANCE END 🟥🟥🟥
+
+**Note:** Text inside the green–red boxes is context only. Do not copy it.
 
 **Task:** Provide me with a reflection or feedback to correct this answer better. Analyze this answer strictly and critically. Point out every flaw and every possible imperfection to subtract every possible score. Let's think step by step.
 
@@ -256,13 +266,19 @@ def create_improvement_prompt(problem_data, original_answer, test_performance, r
 {test_cases_str}
 **Note:** There is 1 additional hidden test case for evaluation.
 
-**Previous Answer:**
+🟩🟩🟩 PREVIOUS ANSWER START 🟩🟩🟩
 {original_answer}
+🟥🟥🟥 PREVIOUS ANSWER END 🟥🟥🟥
 
+🟩🟩🟩 PREVIOUS PERFORMANCE START 🟩🟩🟩
 {performance_str}
+🟥🟥🟥 PREVIOUS PERFORMANCE END 🟥🟥🟥
 
-**Critical Reflection:**
+🟩🟩🟩 CRITICAL REFLECTION START 🟩🟩🟩
 {reflection}
+🟥🟥🟥 CRITICAL REFLECTION END 🟥🟥🟥
+
+**Note:** Text inside the green–red boxes is context only. Do not copy it.
 
 **Task:** Using the reflection above, create an improved solution that addresses all the identified issues. Think step by step and ensure your solution handles all edge cases properly.
 

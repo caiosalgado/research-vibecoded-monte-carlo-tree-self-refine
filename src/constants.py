@@ -6,6 +6,8 @@ Centralized location for hardcoded values
 
 # Default model configurations
 DEFAULT_MODEL = "ollama:gemma3:1b"
+# DEFAULT_MODEL = "ollama:qwen3:1.7b"
+# DEFAULT_MODEL = "ollama:deepseek-r1:1.5b"
 DEFAULT_TEMPERATURE = 0.7
 
 # System prompts
