@@ -711,12 +711,10 @@ class DebugPrinter:
         )
     
     def create_refined_node_name(self, original_name: str) -> str:
-        """Generate name for refined nodes"""
-        if original_name == "dontKnow":
-            return "dontKnow-R1"
-        elif original_name == "weakAnswer":
-            return "weakAnswer-R1"
-        return f"{original_name}-R1"
+        """Generate name for refined nodes - deprecated, use MCTS._create_refined_node_name instead"""
+        # This method is kept for backward compatibility but should not be used
+        # The actual naming logic is now in MCTS._create_refined_node_name
+        return f"{original_name}.rf_1"
         
     def reward_recalculated_and_stored(self, node_name: str, new_reward: float, q_list_length: int):
         """Debug message for reward recalculation and storage"""

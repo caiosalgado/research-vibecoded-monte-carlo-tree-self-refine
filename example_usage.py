@@ -23,11 +23,11 @@ nodes = mcts.get_nodes()
 print("Available nodes:", nodes)
 # %%
 # Get conversation history for a specific node
-history = mcts.get_history("root.2.weak_answer")
+history = mcts.get_history("root.wa")
 print(f"\nConversation history length: {len(history)}")
 # %%
 # Show improved node information
-node_info = mcts.get_node_info("root.2.weak_answer")
+node_info = mcts.get_node_info("root.wa")
 print(f"\nNode info:")
 print(f"  Problem ID: {node_info['problem_id']}")
 print(f"  Prompt Type: {node_info['prompt_type']}")
@@ -39,6 +39,6 @@ mcts.print_tree_summary()
 # %%
 
 # You can also access other nodes:
-# history = mcts.get_history("root.1.dont_know")
+# history = mcts.get_history("root.dk")
 # history = mcts.get_history("None")  # root node 
 # %%

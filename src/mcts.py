@@ -9,6 +9,8 @@ import re
 import math
 from enum import Enum
 from typing import Dict, List, Optional, Any
+
+from .execution_logger import MCTSExecutionLogger
 from .client import AISuiteClient
 from .evaluator import CodeTester, extract_code_delimiters, get_problem
 from .prompt_templates import create_random_dont_know_prompt, create_weak_answer, call_reward, create_reflection_prompt, create_improvement_prompt
@@ -240,6 +242,14 @@ class MCTS:
         if self.debug:
             debug_printer.debug_mode_enabled(self.llm.model, self.max_iter)
         
+        # Initialize comprehensive execution logger
+        self.logger = MCTSExecutionLogger(
+            llm_model=llm.model,
+            system_prompt=llm.system_prompt,
+            max_iterations=max_iter,
+            debug_enabled=debug
+        )
+        
     def fit(self, problem_id: str):
         """
         Main method to run MCTS on a problem
@@ -247,6 +257,9 @@ class MCTS:
         Args:
             problem_id: Problem ID to solve (not the full data)
         """
+        # Start execution logging
+        self.logger.start_execution(problem_id)
+        
         debug_printer.start_mcts()
         
         # Store problem ID only
@@ -272,6 +285,9 @@ class MCTS:
         # Step 6: Generate summary
         self._generate_final_summary()
         
+        # Finalize and save execution log
+        self.logger.finalize_and_save(self.nodes, problem_id)
+        
         debug_printer.mcts_completed()
         
     def _create_root_node(self):
@@ -288,10 +304,10 @@ class MCTS:
         debug_printer.generating_initial_children()
         
         # Child 1: Random "don't know" response
-        child1 = self._create_child("root.1.dont_know", PromptType.RANDOM_DONT_KNOW)
+        child1 = self._create_child("root.dk", PromptType.RANDOM_DONT_KNOW)
         
         # Child 2: Weak answer
-        child2 = self._create_child("root.2.weak_answer", PromptType.WEAK_ANSWER)
+        child2 = self._create_child("root.wa", PromptType.WEAK_ANSWER)
         
         debug_printer.children_generated(child1.name, len(child1.response), child2.name, len(child2.response))
     
@@ -328,6 +344,9 @@ class MCTS:
             debug_printer.step_sending_prompt_to_llm()
             child.response = self.llm.respond(prompt, print_response=False)
             debug_printer.llm_response(child.response, child.name)
+            
+            # Log LLM interaction
+            self.logger.log_llm_interaction(child.name, "initial_response", prompt, child.response)
             
             child.conversation_history = [
                 {"role": "system", "content": self.llm.system_prompt},
@@ -393,6 +412,9 @@ class MCTS:
             # Add initial reward to q_list (SSOT for rewards)
             child.q_list.append(reward)
             
+            # Log evaluation
+            self.logger.log_evaluation(child.name, evaluation_results, reward)
+            
             if reward > -100:
                 debug_printer.reward_parsed_successfully(reward)
             else:
@@ -412,6 +434,9 @@ class MCTS:
             
             # Get reward from LLM  
             reward_response = self.llm.respond(reward_prompt, print_response=False)
+            
+            # Log reward evaluation interaction
+            self.logger.log_llm_interaction(child.name, "reward_evaluation", reward_prompt, reward_response, attempt + 1)
             
             # Store in reward history (separate from conversation history)
             child.reward_history.append({
@@ -583,6 +608,12 @@ class MCTS:
                 uct_value
             )
             
+            # Log UCT calculation
+            self.logger.log_uct_calculation(
+                child.name, uct_value, child.calculate_q_value(), 
+                child.visit_count, parent_visits
+            )
+            
             debug_printer.uct_result(child.name, uct_value, child.reward, child.visit_count)
             
     def _iterative_refinement_cycles(self):
@@ -600,6 +631,9 @@ class MCTS:
                 
             # Create refinement
             refined_node = self._create_refinement(selected_node)
+            
+            # Log refinement cycle
+            self.logger.log_refinement_cycle(iteration + 1, selected_node.name, refined_node.name)
             
             # Evaluate refinement
             self._evaluate_single_node(refined_node)
@@ -627,8 +661,34 @@ class MCTS:
             best_node.uct_value, 
             len(eligible_nodes)
         )
+        
+        # Log node selection
+        self.logger.log_node_selection(best_node.name, best_node.uct_value, len(eligible_nodes))
+        
         return best_node
 
+    def _create_refined_node_name(self, original_name: str) -> str:
+        """Generate name for refined nodes with sequential numbering"""
+        # For refinements of refinements, we increment from the original name
+        # e.g., root.1.dk.rf_1 -> root.1.dk.rf_2 (not root.1.dk.rf_1.rf_1)
+        if ".rf_" in original_name:
+            # Extract base name and current refinement number
+            parts = original_name.rsplit(".rf_", 1)
+            base_name = parts[0]
+            current_rf_num = int(parts[1])
+            next_rf_num = current_rf_num + 1
+        else:
+            # First refinement
+            base_name = original_name
+            next_rf_num = 1
+        
+        # Find the next available refinement number
+        while True:
+            candidate_name = f"{base_name}.rf_{next_rf_num}"
+            if candidate_name not in self.nodes:
+                return candidate_name
+            next_rf_num += 1
+            
     def _can_refine_node(self, node: Node) -> bool:
         """Check if a node can be refined based on child constraints"""
         num_children = len(node.children)
@@ -683,6 +743,9 @@ class MCTS:
             old_uct = leaf_node.uct_value
             leaf_node.uct_value = leaf_node.calculate_uct()
             debug_printer.node_uct_updated(leaf_node.name, old_uct, leaf_node.uct_value)
+            
+            # Log backpropagation step for leaf node
+            self.logger.log_backpropagation_step(leaf_node.name, old_uct, leaf_node.uct_value)
         
         # Step 3 & 4: Backpropagate to parents and ancestors
         processed_nodes = set()  # Track processed nodes to avoid duplicates
@@ -717,6 +780,9 @@ class MCTS:
                     parent.uct_value = parent.calculate_uct_with_temp_q(temp_q)
                     debug_printer.node_uct_updated(parent.name, old_uct, parent.uct_value)
                     
+                    # Log backpropagation step for parent
+                    self.logger.log_backpropagation_step(parent.name, old_uct, parent.uct_value, temp_q)
+                    
                     debug_printer.backpropagation_temp_q_calculated(parent.name, temp_q, current_q, max_child_q)
                 
                 # Mark as processed and add to queue for further propagation
@@ -745,6 +811,9 @@ class MCTS:
         reflection = self.llm.respond(reflection_prompt, print_response=False)
         debug_printer.llm_response(reflection, node.name, truncate=False)
         
+        # Log reflection interaction
+        self.logger.log_llm_interaction(node.name, "reflection", reflection_prompt, reflection)
+        
         debug_printer.reflection_generated_success(len(reflection))
         debug_printer.reflection_generated(len(reflection))
         
@@ -755,7 +824,7 @@ class MCTS:
         debug_printer.generating_refinement(original_node.name)
         
         # Create refined node name
-        refined_name = debug_printer.create_refined_node_name(original_node.name)
+        refined_name = self._create_refined_node_name(original_node.name)
         
         debug_printer.section_refinement_generation(
             original_node.name,
@@ -777,6 +846,9 @@ class MCTS:
         debug_printer.step_getting_improved_response()
         improved_response = self.llm.respond(improvement_prompt, print_response=False)
         debug_printer.llm_response(improved_response, refined_name, truncate=False)
+        
+        # Log refinement interaction
+        self.logger.log_llm_interaction(refined_name, "refinement", improvement_prompt, improved_response)
         
         # Create refined node
         refined_node = Node(
@@ -846,6 +918,9 @@ class MCTS:
         
         # Add initial reward to q_list (SSOT for rewards)
         node.q_list.append(reward)
+        
+        # Log evaluation for single node
+        self.logger.log_evaluation(node.name, evaluation_results, reward)
         
         if reward > -100:
             debug_printer.reward_parsed_successfully(reward)
