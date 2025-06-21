@@ -17,7 +17,7 @@ def test_refinement_cycle(debug=True):
     llm = AISuiteClient(model=DEFAULT_MODEL)
     
     # Initialize MCTS with max_iter=1 for one refinement iteration and debug mode
-    mcts = MCTS(llm=llm, max_iter=1, debug=debug)
+    mcts = MCTS(llm=llm, max_iter=5, debug=debug)
     
     # Run on twoSum problem
     problem_id = "twoSum"
@@ -52,7 +52,7 @@ def test_refinement_cycle_minimal():
 
 if __name__ == "__main__":
     # Run with debug mode by default
-    test_refinement_cycle(debug=True)
+    test_refinement_cycle(debug=False)
     
     # Uncomment to run without debug mode
     # test_refinement_cycle_minimal() 

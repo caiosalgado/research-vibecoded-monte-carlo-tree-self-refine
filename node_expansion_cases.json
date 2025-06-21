@@ -1,0 +1,160 @@
+[
+  {
+    "Case": 1,
+    "NumChildren": 0,
+    "ParentReward": 50.0,
+    "ChildRewards": [],
+    "BestChild": null,
+    "Condition1_len_lt_max": true,
+    "Condition2_best_lt_parent": true,
+    "CanExpand": true,
+    "Reason": "Node with no children can always expand."
+  },
+  {
+    "Case": 2,
+    "NumChildren": 1,
+    "ParentReward": 50.0,
+    "ChildRewards": [
+      30.0
+    ],
+    "BestChild": 30.0,
+    "Condition1_len_lt_max": true,
+    "Condition2_best_lt_parent": true,
+    "CanExpand": true,
+    "Reason": "Few children and best child does not exceed parent."
+  },
+  {
+    "Case": 3,
+    "NumChildren": 2,
+    "ParentReward": 50.0,
+    "ChildRewards": [
+      30.0,
+      40.0
+    ],
+    "BestChild": 40.0,
+    "Condition1_len_lt_max": true,
+    "Condition2_best_lt_parent": true,
+    "CanExpand": true,
+    "Reason": "Below max children and best child lower than parent."
+  },
+  {
+    "Case": 4,
+    "NumChildren": 2,
+    "ParentReward": 50.0,
+    "ChildRewards": [
+      30.0,
+      60.0
+    ],
+    "BestChild": 60.0,
+    "Condition1_len_lt_max": true,
+    "Condition2_best_lt_parent": false,
+    "CanExpand": true,
+    "Reason": "Below max children; Condition 1 alone allows expansion."
+  },
+  {
+    "Case": 5,
+    "NumChildren": 3,
+    "ParentReward": 50.0,
+    "ChildRewards": [
+      30.0,
+      40.0,
+      45.0
+    ],
+    "BestChild": 45.0,
+    "Condition1_len_lt_max": false,
+    "Condition2_best_lt_parent": true,
+    "CanExpand": true,
+    "Reason": "At child limit but no child exceeds parent."
+  },
+  {
+    "Case": 6,
+    "NumChildren": 3,
+    "ParentReward": 50.0,
+    "ChildRewards": [
+      30.0,
+      40.0,
+      60.0
+    ],
+    "BestChild": 60.0,
+    "Condition1_len_lt_max": false,
+    "Condition2_best_lt_parent": false,
+    "CanExpand": false,
+    "Reason": "Child limit reached and at least one child exceeds parent."
+  },
+  {
+    "Case": 7,
+    "NumChildren": 3,
+    "ParentReward": 50.0,
+    "ChildRewards": [
+      70.0,
+      80.0,
+      90.0
+    ],
+    "BestChild": 90.0,
+    "Condition1_len_lt_max": false,
+    "Condition2_best_lt_parent": false,
+    "CanExpand": false,
+    "Reason": "Child limit reached and multiple children exceed parent."
+  },
+  {
+    "Case": 8,
+    "NumChildren": 1,
+    "ParentReward": 20.0,
+    "ChildRewards": [
+      25.0
+    ],
+    "BestChild": 25.0,
+    "Condition1_len_lt_max": true,
+    "Condition2_best_lt_parent": false,
+    "CanExpand": true,
+    "Reason": "Few children, Condition 1 enough even if child exceeds parent."
+  },
+  {
+    "Case": 9,
+    "NumChildren": 4,
+    "ParentReward": 50.0,
+    "ChildRewards": [
+      10.0,
+      20.0,
+      30.0,
+      40.0
+    ],
+    "BestChild": 40.0,
+    "Condition1_len_lt_max": false,
+    "Condition2_best_lt_parent": true,
+    "CanExpand": true,
+    "Reason": "Exceeds max but none of the children beat parent."
+  },
+  {
+    "Case": 10,
+    "NumChildren": 5,
+    "ParentReward": 50.0,
+    "ChildRewards": [
+      10.0,
+      30.0,
+      60.0,
+      70.0,
+      80.0
+    ],
+    "BestChild": 80.0,
+    "Condition1_len_lt_max": false,
+    "Condition2_best_lt_parent": false,
+    "CanExpand": false,
+    "Reason": "Exceeds max and at least one child beats parent."
+  }, 
+  {
+    "Case": 11,
+    "NumChildren": 2,
+    "ParentReward": 50.0,
+    "ChildRewards": [
+      55.0, 
+      45.0
+    ],
+    "BestChild": 55.0,
+    "Condition1_len_lt_max": true,
+    "Condition2_best_lt_parent": false,
+    "CanExpand": true,
+    "Reason": "Fewer than max children; even though one child exceeds parent, expansion is allowed."
+}
+
+]

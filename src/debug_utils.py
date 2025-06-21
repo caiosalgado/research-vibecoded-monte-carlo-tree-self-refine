@@ -247,17 +247,15 @@ class DebugPrinter:
         print(f"⚠️  WARNING: {message}")
         
     def summary_table(self, nodes: List[Dict[str, Any]]):
-        """Print a summary table of all nodes"""
-        if not self.enabled:
-            return
+        """Print a summary table of all nodes - always shown regardless of debug mode"""
             
-        print("\n" + "="*100)
+        print("\n" + "="*110)
         print("📊 FINAL SUMMARY TABLE")
-        print("="*100)
+        print("="*110)
         
         # Table header
-        print(f"{'Node Name':<20} {'Type':<12} {'Reward':<8} {'UCT':<8} {'Code?':<6} {'Reflect?':<9} {'Tests':<10} {'Parent':<15}")
-        print("-" * 100)
+        print(f"{'Node Name':<20} {'Type':<12} {'Reward':<8} {'UCT':<8} {'Visits':<7} {'Code?':<6} {'Reflect?':<9} {'Tests':<10} {'Parent':<15}")
+        print("-" * 110)
         
         # Table rows
         for node in nodes:
@@ -265,14 +263,15 @@ class DebugPrinter:
             node_type = node.get('prompt_type', 'N/A')[:11]
             reward = f"{node.get('reward', 0):.2f}"
             uct = f"{node.get('uct_value', 0):.2f}"
+            visits = str(node.get('visit_count', 0))
             has_code = "✅" if node.get('code_length', 0) > 0 else "❌"
             has_reflection = "✅" if node.get('reflection_length', 0) > 0 else "❌"
             tests = f"{node.get('tests_passed', 0)}/{node.get('tests_total', 0)}"
             parent = node.get('parent_name', 'None')[:14]
             
-            print(f"{name:<20} {node_type:<12} {reward:<8} {uct:<8} {has_code:<6} {has_reflection:<9} {tests:<10} {parent:<15}")
+            print(f"{name:<20} {node_type:<12} {reward:<8} {uct:<8} {visits:<7} {has_code:<6} {has_reflection:<9} {tests:<10} {parent:<15}")
         
-        print("="*100)
+        print("="*110)
         
     def navigation(self, from_node: str, to_node: str, action: str):
         """Print navigation between nodes"""
@@ -619,6 +618,51 @@ class DebugPrinter:
         """Refinement cycle completed successfully"""
         self.success(f"Refinement cycle completed: {refinement_nodes} refined nodes created")
     
+    def refinement_iteration_start(self, iteration: int, max_iter: int):
+        """Start of a refinement iteration"""
+        self.progress(f"\n🔄 REFINEMENT ITERATION {iteration}/{max_iter}")
+        self.progress("=" * 60)
+
+    def refinement_iteration_complete(self, iteration: int):
+        """End of a refinement iteration"""
+        self.progress(f"✅ Iteration {iteration} completed")
+
+    def global_uct_calculation(self):
+        """Global UCT calculation phase"""
+        if not self.enabled:
+            return
+        self.progress("🔢 Recalculating UCT for all nodes...")
+        
+    def backpropagation_started(self, leaf_count: int):
+        """Backpropagation process started"""
+        if not self.enabled:
+            return
+        self.progress(f"🍃 Starting backpropagation from {leaf_count} leaf nodes...")
+        
+    def backpropagation_temp_q_calculated(self, node_name: str, temp_q: float, current_q: float, max_child_q: float):
+        """Backpropagation temporary Q value calculated"""
+        if not self.enabled:
+            return
+        self.progress(f"   🔄 {node_name}: temp_q={temp_q:.2f} (current_q={current_q:.2f} + max_child_q={max_child_q:.2f})/2")
+
+    def node_uct_updated(self, node_name: str, old_uct: float, new_uct: float):
+        """UCT value updated for a node"""
+        if self.enabled:
+            change_indicator = "📈" if new_uct > old_uct else "📉" if new_uct < old_uct else "➖"
+            print(f"   {change_indicator} {node_name}: {old_uct:.4f} → {new_uct:.4f}")
+
+    def best_node_selected_global(self, node_name: str, uct_value: float, total_nodes: int):
+        """Best node selected from global pool"""
+        self.result(f"🎯 Selected from {total_nodes} nodes: {node_name} (UCT: {uct_value:.4f})")
+
+    def node_refinement_blocked(self, node_name: str, num_children: int, max_children: int, better_children: int):
+        """Node refinement blocked due to child constraints"""
+        self.warning(f"🚫 Refinement blocked for {node_name}: has {num_children}/{max_children} children, {better_children} with higher rewards")
+
+    def node_eligible_for_refinement(self, node_name: str, num_children: int, max_children: int):
+        """Node is eligible for refinement"""
+        self.result(f"✅ {node_name} eligible for refinement: {num_children}/{max_children} children")
+
     # === SECTION HEADER METHODS FOR F-STRINGS ===
     
     def section_creating_child_node(self, name: str, node_type: str, parent_name: str):
@@ -667,9 +711,19 @@ class DebugPrinter:
         )
     
     def create_refined_node_name(self, original_name: str) -> str:
-        """Create refined node name"""
-        return f"{original_name}.refined"
-
+        """Generate name for refined nodes"""
+        if original_name == "dontKnow":
+            return "dontKnow-R1"
+        elif original_name == "weakAnswer":
+            return "weakAnswer-R1"
+        return f"{original_name}-R1"
+        
+    def reward_recalculated_and_stored(self, node_name: str, new_reward: float, q_list_length: int):
+        """Debug message for reward recalculation and storage"""
+        if not self.enabled:
+            return
+        print(f"🔄 REWARD RECALCULATED for {node_name}: {new_reward:.2f} (q_list now has {q_list_length} values)")
+    
     def detailed_node_information(self, mcts: Any, preview_chars: int = 30):
         """Print detailed information for every node with truncated previews.
         Args:
@@ -690,7 +744,8 @@ class DebugPrinter:
                     text_single_line = text.replace("\n", " ")
                     return (text_single_line[:preview_chars] + "…") if len(text_single_line) > preview_chars else text_single_line
 
-                response_preview = _preview(node.response)
+                current_response = _preview(node.response)
+                parent_response = _preview(node.parent.response) if node.parent and node.parent.response else "N/A"
                 code_preview = _preview(node.code)
                 reflection_preview = _preview(getattr(node, "reflection", "")) if hasattr(node, "reflection") else ""
 
@@ -703,8 +758,15 @@ class DebugPrinter:
                     f"{node.evaluation_results.get('accuracy', 0):.1%}"
                     if node.evaluation_results else "N/A"
                 )
-                refined_answer = getattr(node, "parent_node_name", None) or "N/A"
                 
+                # Determine node type clearly
+                if node_name == "None":
+                    node_type = "root"
+                elif node.prompt_type.value == "refinement":
+                    node_type = "refinement"
+                else:
+                    node_type = "initial"
+
                 # Handle reward comparison logic properly
                 if node_name == "None":
                     # Root node - no meaningful reward/UCT comparison
@@ -728,7 +790,9 @@ class DebugPrinter:
 
                 # Print block per node
                 print(f"\n{node_name}:")
-                print(f"  response_preview   : {response_preview}")
+                print(f"  node_type          : {node_type}")
+                print(f"  current_response   : {current_response}")
+                print(f"  parent_response    : {parent_response}")
                 print(f"  code_preview       : {code_preview}")
                 print(f"  visit_count        : {node.visit_count}")
                 print(f"  uct_value          : {uct_display}")
@@ -739,7 +803,6 @@ class DebugPrinter:
                 print(f"  children_list      : {children_list}")
                 print(f"  partial_accuracy   : {partial_acc}")
                 print(f"  parent             : {parent_name}")
-                print(f"  refined_answer     : {refined_answer}")
                 print(f"  is_reward_better   : {is_reward_better}")
         except Exception as e:
             self.warning(f"Failed to print detailed node information: {e}")

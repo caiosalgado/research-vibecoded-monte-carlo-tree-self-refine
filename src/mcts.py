@@ -12,7 +12,7 @@ from typing import Dict, List, Optional, Any
 from .client import AISuiteClient
 from .evaluator import CodeTester, extract_code_delimiters, get_problem
 from .prompt_templates import create_random_dont_know_prompt, create_weak_answer, call_reward, create_reflection_prompt, create_improvement_prompt
-from .constants import REWARD_PARSING_RETRIES, UCT_EXPLORATION_CONSTANT, UCT_EPSILON
+from .constants import REWARD_PARSING_RETRIES, UCT_EXPLORATION_CONSTANT, UCT_EPSILON, MAX_CHILDREN_PER_NODE
 from .regex_patterns import regex_parse_score_comprehensive, SCORE_PATTERNS
 from .debug_utils import debug_printer, set_debug_mode
 
@@ -54,16 +54,25 @@ class Node:
         self.parent = parent
         self.children: List['Node'] = []
         self.response: str = ""
-        self.reward: float = 0.0
+        self.q_list: List[float] = []  # SSOT for all rewards and visit counting
         self.conversation_history: List[Dict[str, str]] = []
         self.reward_history: List[Dict[str, str]] = []  # Separate reward conversations
         self.evaluation_results: Optional[Dict[str, Any]] = None  # Store evaluation results
-        self.visit_count: int = 0
         self.uct_value: float = 0.0
         
         # Refinement-specific fields
         self.reflection: str = ""  # Store reflection text for refinement nodes
         self.parent_node_name: Optional[str] = None  # Track which node this was refined from
+        
+    @property
+    def reward(self) -> float:
+        """Returns the most recent reward from q_list (SSOT)"""
+        return self.q_list[-1] if self.q_list else 0.0
+        
+    @property
+    def visit_count(self) -> int:
+        """Returns the number of visits based on q_list length (SSOT)"""
+        return len(self.q_list)
         
     @property
     def problem_data(self) -> Dict[str, Any]:
@@ -87,31 +96,103 @@ class Node:
         Returns:
             UCT value for node selection
         """
-        # Q(a) - Average reward (exploitation term)
-        exploitation = self.reward
+        # Q(a) - Average reward using centralized calculation
+        exploitation = self.calculate_q_value()
         
-        # Get parent visits (0 if no parent)
-        parent_visits = self.parent.visit_count if self.parent is not None else 0
-        own_visits = self.visit_count
+        # Get parent visits using centralized method
+        parent_visits = self._calculate_parent_visits()
         
-        # c * sqrt(ln(N(Father(a)) + 1) / (N(a) + ε)) - Exploration term
-        exploration = exploration_constant * math.sqrt(
-            math.log(parent_visits + 1) / (own_visits + UCT_EPSILON)
-        )
+        # Calculate exploration term using centralized method
+        exploration = self._calculate_exploration_term(exploration_constant, parent_visits, self.visit_count)
         
         uct_value = exploitation + exploration
         self.uct_value = uct_value  # Cache the calculated value
         
         return uct_value
         
-    def update_visit_count(self):
-        """Increment visit count for this node"""
-        self.visit_count += 1
+    def calculate_uct_with_temp_q(self, temp_q_value: float, exploration_constant: float = UCT_EXPLORATION_CONSTANT) -> float:
+        """
+        Calculate UCT value using a temporary Q value (for backpropagation)
+        
+        This method is used during backpropagation to calculate UCT with a temporary
+        Q value without modifying the node's actual reward or q_list.
+        
+        Args:
+            temp_q_value: Temporary Q value to use instead of q_list-based calculation
+            exploration_constant: Exploration parameter c (default from constants)
+            
+        Returns:
+            UCT value calculated with the temporary Q value
+        """
+        # Use the temporary Q value instead of calculating from q_list
+        exploitation = temp_q_value
+        
+        # Get parent visits using centralized method
+        parent_visits = self._calculate_parent_visits()
+        
+        # Calculate exploration term using centralized method
+        exploration = self._calculate_exploration_term(exploration_constant, parent_visits, self.visit_count)
+        
+        uct_value = exploitation + exploration
+        # Note: We don't update self.uct_value here since this is temporary
+        
+        return uct_value
         
     def add_child(self, child: 'Node'):
         """Add a child node"""
         child.parent = self
         self.children.append(child)
+        
+    def _calculate_parent_visits(self) -> int:
+        """Centralized parent visits calculation - DRY principle"""
+        if self.parent is None:
+            return 1  # Root has no parent, use 1 for calculations
+        parent_q_list_length = len(self.parent.q_list)
+        return parent_q_list_length if parent_q_list_length > 0 else 1
+    
+    def _calculate_exploration_term(self, exploration_constant: float, parent_visits: int, own_visits: int) -> float:
+        """Centralized exploration term calculation - DRY principle"""
+        if own_visits == 0:
+            return float('inf')  # Unvisited nodes get highest priority
+        return exploration_constant * math.sqrt(
+            math.log(parent_visits + 1) / (own_visits + UCT_EPSILON)
+        )
+        
+    def calculate_q_value(self) -> float:
+        """
+        Calculate Q value using the formula: (min(q_list) + avg(q_list)) / 2
+        
+        This is the centralized location for Q value calculation to avoid duplication.
+        
+        Returns:
+            Q value calculated from q_list, or 0.0 if q_list is empty
+        """
+        if len(self.q_list) == 0:
+            return 0.0  # No rewards yet
+        elif len(self.q_list) == 1:
+            return self.q_list[0]  # Only one reward, use it directly
+        else:
+            min_reward = min(self.q_list)
+            avg_reward = sum(self.q_list) / len(self.q_list)
+            return (min_reward + avg_reward) / 2
+        
+    def recalculate_and_store_reward(self, mcts_instance):
+        """
+        Recalculate the reward for this node and append it to q_list
+        
+        Args:
+            mcts_instance: MCTS instance to access reward calculation methods
+        """
+        # Only recalculate if node has been evaluated before
+        if self.evaluation_results is not None:
+            new_reward = mcts_instance._get_reward_for_node(self)
+            self.q_list.append(new_reward)
+            
+            if mcts_instance.debug:
+                from .debug_utils import debug_printer
+                debug_printer.reward_recalculated_and_stored(
+                    self.name, new_reward, len(self.q_list)
+                )
         
     def to_dict(self):
         """Convert node to dictionary for inspection"""
@@ -120,7 +201,9 @@ class Node:
             'problem_id': self.problem_id,
             'prompt_type': self.prompt_type.value,
             'reward': self.reward,
-            'visit_count': self.visit_count,
+            'q_list': self.q_list.copy(),  # Copy to avoid external modification
+            'q_list_length': len(self.q_list),  # Keep for backward compatibility
+            'visit_count': self.visit_count,  # Now guaranteed to match q_list_length
             'uct_value': self.uct_value,
             'response_length': len(self.response),
             'code_length': len(self.code),  # Uses @property
@@ -181,10 +264,10 @@ class MCTS:
         # Step 4: Calculate UCT for initial children
         self._calculate_initial_uct()
         
-        # Step 5: Enter refinement cycle (max_iter=1 means one refinement iteration)
+        # Step 5: Iterative refinement cycles
         if self.max_iter > 0:
             debug_printer.start_refinement_cycle_main()
-            self._refinement_cycle()
+            self._iterative_refinement_cycles()
         
         # Step 6: Generate summary
         self._generate_final_summary()
@@ -306,7 +389,9 @@ class MCTS:
             # Get reward with retry mechanism
             debug_printer.step_parsing_reward()
             reward = self._parse_reward_with_retry(reward_prompt, child)
-            child.reward = reward
+            
+            # Add initial reward to q_list (SSOT for rewards)
+            child.q_list.append(reward)
             
             if reward > -100:
                 debug_printer.reward_parsed_successfully(reward)
@@ -481,14 +566,8 @@ class MCTS:
         
         debug_printer.section_uct_calculation_phase()
         
-        # Initialize visit counts - children get 1 visit each, root gets sum
-        for child in self.root.children:
-            child.visit_count = 1
-            child.update_visit_count()  # This will make it 2, but we want 1
-            child.visit_count = 1  # Reset to 1
-            
-        # Root gets total visits from children
-        self.root.visit_count = len(self.root.children)
+        # Visit counts are now automatically calculated from q_list length in calculate_uct()
+        # No need to manually set visit counts
         
         # Calculate UCT for each child
         for child in self.root.children:
@@ -506,45 +585,144 @@ class MCTS:
             
             debug_printer.uct_result(child.name, uct_value, child.reward, child.visit_count)
             
-    def _select_best_node(self) -> Node:
-        """Select the node with the highest UCT value"""
-        best_node = None
-        best_uct = float('-inf')
+    def _iterative_refinement_cycles(self):
+        """Run iterative MCTS refinement for max_iter iterations"""
+        for iteration in range(self.max_iter):
+            debug_printer.refinement_iteration_start(iteration + 1, self.max_iter)
+            
+            # Select best node from ALL nodes
+            selected_node = self._select_best_node_global()
+            
+            # Check if node can be refined
+            if not self._can_refine_node(selected_node):
+                debug_printer.refinement_iteration_complete(iteration + 1)
+                continue
+                
+            # Create refinement
+            refined_node = self._create_refinement(selected_node)
+            
+            # Evaluate refinement
+            self._evaluate_single_node(refined_node)
+            
+            # Backpropagate UCT values using new algorithm
+            self._backpropagate_uct()
+            
+            debug_printer.refinement_iteration_complete(iteration + 1)
+
+    def _select_best_node_global(self) -> Node:
+        """Select node with highest UCT from ALL nodes (excluding root)"""
+        eligible_nodes = [node for name, node in self.nodes.items() 
+                         if name != "None"]  # All except root
         
-        # Look at all non-root nodes
-        for node in self.nodes.values():
-            if node.name != "None":  # Skip root
-                uct_value = node.calculate_uct()
-                if uct_value > best_uct:
-                    best_uct = uct_value
-                    best_node = node
-                    
-        debug_printer.best_node_selected(best_node.name, best_uct)
+        if not eligible_nodes:
+            raise ValueError("No eligible nodes for selection")
+            
+        best_node = max(eligible_nodes, key=lambda n: n.uct_value)
+        
+        # Recalculate reward for the selected node and append to q_list
+        best_node.recalculate_and_store_reward(self)
+        
+        debug_printer.best_node_selected_global(
+            best_node.name, 
+            best_node.uct_value, 
+            len(eligible_nodes)
+        )
         return best_node
+
+    def _can_refine_node(self, node: Node) -> bool:
+        """Check if a node can be refined based on child constraints"""
+        num_children = len(node.children)
         
-    def _refinement_cycle(self):
-        """Implement the refinement cycle"""
-        debug_printer.starting_refinement_cycle()
+        # Always allow refinement if under max children
+        if num_children < MAX_CHILDREN_PER_NODE:
+            debug_printer.node_eligible_for_refinement(node.name, num_children, MAX_CHILDREN_PER_NODE)
+            return True
+            
+        # If at max children, check if any child has better Q value
+        better_children = sum(1 for child in node.children if child.calculate_q_value() > node.calculate_q_value())
         
-        # Step 1: Select the best node by UCT
-        selected_node = self._select_best_node()
+        if better_children > 0:
+            debug_printer.node_refinement_blocked(
+                node.name, num_children, MAX_CHILDREN_PER_NODE, better_children
+            )
+            return False
+        else:
+            debug_printer.node_eligible_for_refinement(node.name, num_children, MAX_CHILDREN_PER_NODE)
+            return True
+
+    def _create_refinement(self, original_node: Node) -> Node:
+        """Create a refinement of any node (combines existing refinement logic)"""
+        # Generate reflection
+        reflection = self._generate_reflection(original_node)
         
-        # Step 2: Generate reflection
-        reflection = self._generate_reflection(selected_node)
+        # Generate improved node
+        refined_node = self._generate_refinement(original_node, reflection)
         
-        # Step 3: Generate improved answer using reflection
-        refined_node = self._generate_refinement(selected_node, reflection)
+        return refined_node
+
+    def _backpropagate_uct(self):
+        """
+        Backpropagate UCT values using the new algorithm:
+        1. Identify leaf nodes (nodes with no children)
+        2. Calculate UCT for leaf nodes using their q_list
+        3. For each parent/ancestor, update Q using: q_new = (q_current + max(q_children)) / 2
+        4. Use temporary Q values to recalculate UCT without modifying q_list
+        """
+        debug_printer.global_uct_calculation()
         
-        # Step 4: Evaluate the refined node
-        self._evaluate_single_node(refined_node)
+        # Step 1: Identify all leaf nodes (nodes with no children)
+        leaf_nodes = []
+        for node_name, node in self.nodes.items():
+            if node_name != "None" and len(node.children) == 0:  # Skip root, find leaves
+                leaf_nodes.append(node)
         
-        # Step 5: Calculate UCT for the new node
-        refined_node.visit_count = 1
-        refined_node.parent.visit_count += 1  # Update parent's visit count
-        uct_value = refined_node.calculate_uct()
+        debug_printer.backpropagation_started(len(leaf_nodes))
         
-        debug_printer.refined_node_created(refined_node.name, uct_value, refined_node.reward)
+        # Step 2: Calculate UCT for leaf nodes using current method (q_list-based)
+        for leaf_node in leaf_nodes:
+            old_uct = leaf_node.uct_value
+            leaf_node.uct_value = leaf_node.calculate_uct()
+            debug_printer.node_uct_updated(leaf_node.name, old_uct, leaf_node.uct_value)
         
+        # Step 3 & 4: Backpropagate to parents and ancestors
+        processed_nodes = set()  # Track processed nodes to avoid duplicates
+        
+        # Start from leaf nodes and work up to root
+        nodes_to_process = leaf_nodes.copy()
+        
+        while nodes_to_process:
+            current_node = nodes_to_process.pop(0)
+            
+            # Process parent if it exists and hasn't been processed
+            if current_node.parent and current_node.parent.name not in processed_nodes:
+                parent = current_node.parent
+                
+                # Skip root node
+                if parent.name == "None":
+                    continue
+                
+                # Calculate temporary Q value: q_new = (q_current + max(q_children)) / 2
+                if len(parent.children) > 0:
+                    # Get current Q value from parent's q_list using centralized calculation
+                    current_q = parent.calculate_q_value()
+                    
+                    # Get maximum Q value from children using centralized calculation
+                    max_child_q = max(child.calculate_q_value() for child in parent.children)
+                    
+                    # Calculate new temporary Q value
+                    temp_q = (current_q + max_child_q) / 2
+                    
+                    # Calculate UCT with temporary Q value
+                    old_uct = parent.uct_value
+                    parent.uct_value = parent.calculate_uct_with_temp_q(temp_q)
+                    debug_printer.node_uct_updated(parent.name, old_uct, parent.uct_value)
+                    
+                    debug_printer.backpropagation_temp_q_calculated(parent.name, temp_q, current_q, max_child_q)
+                
+                # Mark as processed and add to queue for further propagation
+                processed_nodes.add(parent.name)
+                nodes_to_process.append(parent)
+
     def _generate_reflection(self, node: Node) -> str:
         """Generate critical reflection for a node"""
         debug_printer.section_reflection_generation(
@@ -605,7 +783,7 @@ class MCTS:
             name=refined_name,
             problem_id=self.problem_id,
             prompt_type=PromptType.REFINEMENT,
-            parent=original_node.parent  # Same parent as original
+            parent=original_node  
         )
         
         # Set node properties
@@ -631,9 +809,11 @@ class MCTS:
         else:
             debug_printer.no_code_found_in_refined(refined_name)
         
-        # Add to tree structure
-        original_node.parent.add_child(refined_node)
+        # Add to tree structure - refined node should be child of the original selected node
+        original_node.add_child(refined_node)
         self.nodes[refined_name] = refined_node
+        
+        # Visit counts are now automatically calculated from q_list length
         
         debug_printer.refinement_node_created(refined_name)
         return refined_node
@@ -663,7 +843,9 @@ class MCTS:
         # Create and process reward
         debug_printer.step_getting_reward_evaluation()
         reward = self._get_reward_for_node(node)
-        node.reward = reward
+        
+        # Add initial reward to q_list (SSOT for rewards)
+        node.q_list.append(reward)
         
         if reward > -100:
             debug_printer.reward_parsed_successfully(reward)
